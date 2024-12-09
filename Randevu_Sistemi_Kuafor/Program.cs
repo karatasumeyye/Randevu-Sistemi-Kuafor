@@ -1,4 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using Randevu_Sistemi_Kuafor.Models;
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Veritabaný baðlantýsýný
+builder.Services.AddDbContext<SalonDbContext>(options =>
+    options.UseNpgsql("Host=localhost;Port=5432;Database=Randevu_Sistemi_Kuafor_DB;Username=postgres;Password=1234"));
+
+
+
+
+
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
