@@ -1,0 +1,9 @@
+# Visual Studio çalýþma dosyalarý
+.vs/
+*.suo
+*.user
+*.cache
+
+# Geçici derleme dosyalarý
+bin/
+obj/
