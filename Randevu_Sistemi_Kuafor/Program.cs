@@ -10,12 +10,17 @@ builder.Services.AddDbContext<SalonDbContext>(options =>
 
 
 
-
-
-
-
+// Session desteði ekleniyor
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true; // Güvenlik için cookie yalnýzca HTTP üzerinden eriþilebilir.
+    options.Cookie.IsEssential = true; // Cookie'nin kritik olduðunu belirtir.
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Oturum süresinin zaman aþýmý.
+});
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
 
 var app = builder.Build();
 
@@ -27,6 +32,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseSession();  //oturumlarý kullanabilmek için 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

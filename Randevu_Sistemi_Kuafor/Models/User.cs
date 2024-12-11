@@ -26,6 +26,6 @@ namespace Randevu_Sistemi_Kuafor.Models
         public string Password { get; set; }
 
         // İlişkiler
-        public ICollection<Appointment> Appointments { get; set; }
+        public ICollection<Appointment>? Appointments{ get; set; }
     }
 }

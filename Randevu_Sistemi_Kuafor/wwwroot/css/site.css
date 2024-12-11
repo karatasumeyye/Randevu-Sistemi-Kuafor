@@ -1,4 +1,4 @@
-html {
+/*html {
   font-size: 14px;
 }
 
@@ -20,3 +20,287 @@ html {
 body {
   margin-bottom: 60px;
 }
+*/
+
+
+
+
+/**
+* Template Name: Bethany
+* Template URL: https://bootstrapmade.com/bethany-free-onepage-bootstrap-theme/
+* Updated: Aug 07 2024 with Bootstrap v5.3.3
+* Author: BootstrapMade.com
+* License: https://bootstrapmade.com/license/
+*/
+
+/*--------------------------------------------------------------
+# Font & Color Variables
+# Help: https://bootstrapmade.com/color-system/
+--------------------------------------------------------------*/
+/* Fonts */
+:root {
+    --default-font: "Roboto", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --heading-font: "Raleway", sans-serif;
+    --nav-font: "Poppins", sans-serif;
+}
+
+/* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
+:root {
+    --background-color: #ffffff; /* Background color for the entire website, including individual sections */
+    --default-color: #444444; /* Default color used for the majority of the text content across the entire website */
+    --heading-color: #36343a; /* Color for headings, subheadings and title throughout the website */
+    --accent-color: #009970; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+    --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
+    --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
+}
+
+/* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */
+:root {
+    --nav-color: #444444; /* The default color of the main navmenu links */
+    --nav-hover-color: #009970; /* Applied to main navmenu links when they are hovered over or active */
+    --nav-mobile-background-color: #ffffff; /* Used as the background color for mobile navigation menu */
+    --nav-dropdown-background-color: #ffffff; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
+    --nav-dropdown-color: #444444; /* Used for navigation links of the dropdown items in the navigation menu. */
+    --nav-dropdown-hover-color: #009970; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
+}
+
+/* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
+
+.light-background {
+    --background-color: #f9f9f9;
+    --surface-color: #ffffff;
+}
+
+.dark-background {
+    --background-color: #060606;
+    --default-color: #ffffff;
+    --heading-color: #ffffff;
+    --surface-color: #252525;
+    --contrast-color: #ffffff;
+}
+
+.accent-background {
+    --background-color: #009970;
+    --default-color: #ffffff;
+    --heading-color: #ffffff;
+    --accent-color: #ffffff;
+    --surface-color: #00cc95;
+}
+
+/* Smooth scroll */
+:root {
+    scroll-behavior: smooth;
+}
+
+body {
+    color: var(--default-color);
+    background-color: var(--background-color);
+    font-family: var(--default-font);
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+    a:hover {
+        color: color-mix(in srgb, var(--accent-color), transparent 25%);
+        text-decoration: none;
+    }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--heading-color);
+    font-family: var(--heading-font);
+}
+
+
+
+/*--------------------------------------------------------------
+# Global Sections
+--------------------------------------------------------------*/
+section,
+.section {
+    color: var(--default-color);
+    background-color: var(--background-color);
+    padding: 60px 0;
+    scroll-margin-top: 65px;
+    overflow: clip;
+}
+
+@media (max-width: 1199px) {
+
+    section,
+    .section {
+        scroll-margin-top: 53px;
+    }
+}
+
+/*--------------------------------------------------------------
+# Global Section Titles
+--------------------------------------------------------------*/
+.section-title {
+    padding-bottom: 60px;
+    position: relative;
+}
+
+    .section-title h2 {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        position: relative;
+    }
+
+        .section-title h2:after {
+            content: "";
+            position: absolute;
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+    .section-title p {
+        margin-bottom: 0;
+    }
+
+
+/*--------------------------------------------------------------
+# Hero Section
+--------------------------------------------------------------*/
+.hero {
+    width: 100%;
+    min-height: 75vh;
+    position: relative;
+    padding: 80px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .hero img {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+    }
+
+    .hero:before {
+        content: "";
+        background: color-mix(in srgb, var(--background-color), transparent 30%);
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+    }
+
+    .hero .container {
+        position: relative;
+        z-index: 3;
+    }
+
+    .hero h2 {
+        margin: 0;
+        font-size: 48px;
+        font-weight: 700;
+    }
+
+    .hero p {
+        margin: 10px 0 0 0;
+        font-size: 24px;
+        color: var(--heading-color);
+    }
+
+    .hero .btn-get-started {
+        color: var(--default-color);
+        font-weight: 400;
+        font-size: 16px;
+        letter-spacing: 1px;
+        display: inline-block;
+        padding: 8px 40px;
+        margin: 30px 0 0 0;
+        border-radius: 50px;
+        transition: 0.5s;
+        border: 2px solid color-mix(in srgb, var(--default-color), transparent 50%);
+    }
+
+        .hero .btn-get-started:hover {
+            color: var(--default-color);
+            background: #7b1114;
+            border-color: #7b1114;
+        }
+
+
+    .hero section dark-background  {
+        width:100%;
+
+    }
+@media (max-width: 768px) {
+    .hero h2 {
+        font-size: 32px;
+    }
+
+    .hero p {
+        font-size: 18px;
+    }
+
+
+
+
+
+/*--------------------------------------------------------------
+# About Section
+--------------------------------------------------------------*/
+    .about .content h3 {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .about .content ul {
+        list-style: none;
+        padding: 0;
+    }
+
+        .about .content ul li {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 40px;
+        }
+
+        .about .content ul i {
+            flex-shrink: 0;
+            font-size: 48px;
+            color: var(--accent-color);
+            margin-right: 20px;
+            line-height: 0;
+        }
+
+        .about .content ul h5 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .about .content ul p {
+            font-size: 15px;
+        }
+
+    .about .content p:last-child {
+        margin-bottom: 0;
+    }
+
+    .about .pulsating-play-btn {
+        position: absolute;
+        left: calc(50% - 47px);
+        top: calc(50% - 47px);
+    }
