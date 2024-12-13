@@ -99,7 +99,7 @@ body {
 }
 
 a {
-    color: var(--accent-color);
+    color: #7b1114;
     text-decoration: none;
     transition: 0.3s;
 }

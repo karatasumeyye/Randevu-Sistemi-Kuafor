@@ -20,7 +20,7 @@ namespace Randevu_Sistemi_Kuafor.Models
         public decimal Price { get; set; }
 
         // İlişkiler
-        public ICollection<Appointment> Appointments { get; set; }
-        public ICollection<EmployeeService> EmployeeServices { get; set; }
+        public ICollection<Appointment>? Appointments { get; set; }
+        public ICollection<EmployeeService>? EmployeeServices { get; set; }
     }
 }

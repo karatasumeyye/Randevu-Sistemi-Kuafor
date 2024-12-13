@@ -1,0 +1,12 @@
+﻿.custom-sidebar {
+    background-color: #560c0e; /* Sidebar arka plan rengi */
+    color: white; /* Yazı rengi */
+}
+
+    .custom-sidebar a {
+        color: #FFFFFF; /* Sidebar bağlantıların rengi */
+    }
+
+        .custom-sidebar a:hover {
+            color: #FFD700; /* Bağlantıya gelindiğinde rengi */
+        }
