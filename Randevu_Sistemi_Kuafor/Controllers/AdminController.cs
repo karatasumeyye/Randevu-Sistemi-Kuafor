@@ -130,5 +130,16 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         }
 
 
+        [HttpGet]
+
+        public IActionResult AddEmployee()
+        {
+            var users = _context.Users.ToList();
+            return View(users);
+        }
+
+
+
+
     }
 }
