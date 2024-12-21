@@ -7,48 +7,108 @@
 
 <h1>AddEmployee</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
+<!-- Arama Alanı -->
+<div class="mb-3">
+    <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email or phone...">
+</div>
+
+<!-- Kullanıcılar Listesi -->
+<table class="table" id="userTable">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Phone)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Password)
-            </th>
-            <th></th>
+            <th>@Html.DisplayNameFor(m => m.First().Name)</th>
+            <th>@Html.DisplayNameFor(m => m.First().Email)</th>
+            <th>@Html.DisplayNameFor(m => m.First().Phone)</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Phone)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Password)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.UserId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.UserId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.UserId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr class="table-row" data-id="@item.UserId">
+                <td>@item.Name</td>
+                <td>@item.Email</td>
+                <td>@item.Phone</td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<!-- Tek bir buton -->
+<button class="btn btn-warning open-modal" data-bs-toggle="modal" data-bs-target="#editModal">Add Employee</button>
+
+<!-- Modal for Add Employee -->
+<div class="modal" tabindex="-1" id="editModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Employee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="@Url.Action("AddEmployee", "Admin")">
+                    <!-- User Information -->
+                    <input type="hidden" name="UserId" id="editUserId" />
+
+                    <div class="mb-3">
+                        <label for="editSpecialty" class="form-label">Specialty</label>
+                        <input type="text" class="form-control" id="editSpecialty" name="Specialty" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editSalary" class="form-label">Salary</label>
+                        <input type="number" class="form-control" id="editSalary" name="Salary" required min="0" step="0.01" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editStartDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="editStartDate" name="StartDate" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var selectedRow = null;
+
+            // Satıra tıklama olayını dinle
+            $('.table-row').on('click', function () {
+                // Daha önce seçilen satırı temizle
+                if (selectedRow) {
+                    $(selectedRow).removeClass('table-active');
+                }
+
+                // Yeni seçilen satırı belirle ve stil ekle
+                selectedRow = this;
+                $(this).addClass('table-active');
+
+                // Seçilen satırdan UserId al
+                var userId = $(this).data('id');
+                $('#editUserId').val(userId);
+            });
+
+            // Butona tıklama olayını dinle
+            $('.open-modal').on('click', function () {
+                if (!selectedRow) {
+                    alert('Lütfen bir satır seçin.');
+                }
+            });
+
+            // Arama işlevselliği
+            $('#searchInput').on('keyup', function () {
+                var value = $(this).val().toLowerCase().trim();
+                $('#userTable tbody tr').filter(function () {
+                    var name = $(this).find('td:nth-child(1)').text().toLowerCase(); // İlk sütun: isim
+                    var email = $(this).find('td:nth-child(2)').text().toLowerCase(); // İkinci sütun: email
+                    var phone = $(this).find('td:nth-child(3)').text().toLowerCase(); // Üçüncü sütun: telefon
+                    $(this).toggle(name.indexOf(value) > -1 || email.indexOf(value) > -1 || phone.indexOf(value) > -1);
+                });
+            });
+        });
+    </script>
+}

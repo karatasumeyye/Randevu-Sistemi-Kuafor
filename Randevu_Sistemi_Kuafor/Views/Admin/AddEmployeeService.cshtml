@@ -1,0 +1,134 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@model IEnumerable<dynamic>
+
+<!-- Arama Alanı -->
+<div class="mb-3">
+    <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email or phone...">
+</div>
+
+
+<table class="table" id="userTable">
+    <thead>
+        <tr>
+            <th>User Name</th>
+            <th>Specialty</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="table-row" data-id="@item.EmployeeId">       
+                <td>@item.UserName</td>
+                <td>@item.Specialty</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <!-- Servis Seç Butonu -->
+                        <button type="button" class="btn btn-primary select-services-btn" data-id="@item.EmployeeId">Servis Seç</button>
+                    
+                        <!-- Detay Butonu -->    
+                        <form asp-action="EmployeeDetail" asp-route-employeeId="@item.EmployeeId">
+                            <button type="submit" class="btn btn-info detail-btn">Detay</button>
+                        </form>
+
+                        <!-- Düzenle Butonu -->
+                        <button type="button" class="btn btn-warning edit-btn" data-id="@item.EmployeeId">Düzenle</button>
+                 
+                  
+                        <!-- Sil Butonu -->
+                        <button type="button" class="btn btn-danger delete-btn" data-id="@item.EmployeeId">Sil</button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="serviceModal" tabindex="-1" aria-labelledby="serviceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="serviceModalLabel">Servis Seç</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="serviceList">
+                    <!-- Servis listesi burada dinamik olarak yüklenecek -->
+                </div>
+                <input type="hidden" id="editUserId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveServices">Kaydet</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Servis Seç Butonu
+            $('.select-services-btn').on('click', function () {
+                var employeeId = $(this).data('id');
+                // Servis seçimi modalini aç
+                $('#editUserId').val(employeeId); // Employee ID'yi modalda sakla
+                loadServices(employeeId);        // Servisleri yükle
+                $('#serviceModal').modal('show');
+            });
+
+            // Servisleri yükle
+            function loadServices(employeeId) {
+                $.ajax({
+                    url: '/Admin/GetServices?employeeId=' + employeeId,
+                    method: 'GET',
+                    success: function (data) {
+                        console.log(data);  // Burada gelen veriyi kontrol etmek için 
+                        var serviceListHtml = '';
+                        data.forEach(function (service) {
+                            // IsSelected yok, varsayılan olarak false diyelim
+                            var isChecked = service.isSelected ? 'checked' : '';  // Varsayılan olarak seçilmemiş
+                            serviceListHtml += `
+                                <div>
+                                    <input type="checkbox" class="service-checkbox" data-id="${service.serviceId}" ${isChecked ? 'checked' : ''} />
+                                    ${service.serviceName}
+                                </div>`;
+                        });
+                        $('#serviceList').html(serviceListHtml);
+                    },
+                    error: function () {
+                        alert('Servisler yüklenirken bir hata oluştu.');
+                    }
+                });
+            }
+
+            // Seçilen servisleri kaydet
+            $('#saveServices').on('click', function () {
+                var selectedServices = [];
+                $('.service-checkbox:checked').each(function () {
+                    selectedServices.push($(this).data('id'));
+                });
+
+                var employeeId = $('#editUserId').val();
+
+                $.ajax({
+                    url: '/Admin/SaveServices',
+                    method: 'POST',
+                    data: { employeeId: employeeId, serviceIds: selectedServices },
+                    success: function (response) {
+                        alert('Servisler başarıyla kaydedildi.');
+                        $('#serviceModal').modal('hide');
+                    },
+                    error: function () {
+                        alert('Servisler kaydedilirken bir hata oluştu.');
+                    }
+                });
+            });
+        });
+
+    </script>
+}

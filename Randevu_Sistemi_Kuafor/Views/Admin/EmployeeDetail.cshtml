@@ -1,0 +1,21 @@
+﻿@model Randevu_Sistemi_Kuafor.Models.EmployeeDetailsViewModel
+
+<h2>Çalışan Detayları</h2>
+
+<div>
+    <h4>Çalışan Bilgileri</h4>
+    <p><strong>Adı:</strong> @Model.Employee.User.Name</p>
+    <p><strong>Görevi:</strong> @Model.Employee.Specialty</p>
+    <p><strong>Email:</strong> @Model.Employee.User.Email</p>
+    <p><strong>Telefon:</strong> @Model.Employee.User.Phone</p>
+</div>
+
+<div>
+    <h4>Yapılan Servisler</h4>
+    <ul>
+        @foreach (var service in Model.Services)
+        {
+            <li>@service.ServiceName</li>
+        }
+    </ul>
+</div>

@@ -138,6 +138,132 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return View(users);
         }
 
+        [HttpPost]
+        public IActionResult AddEmployee(int userId, string specialty,decimal salary, DateTime startDate)
+        {
+            var user = _context.Users.Find(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var employee = new Employee
+            {
+                UserId = user.UserId,
+                Specialty = specialty,
+                Salary=salary,
+                StartDate = startDate.ToUniversalTime()
+            };
+
+            _context.Employees.Add(employee);
+            _context.SaveChanges();
+
+            TempData["Message"] = "Employee added successfully!";
+            return RedirectToAction("AddEmployee", "Admin");
+        }
+
+
+        //Employee Tablosunndakileri listeleme
+        [HttpGet]
+        public IActionResult AddEmployeeService()
+        {
+            var employeeWithUserInfo = from e in _context.Employees
+                                       join u in _context.Users on e.UserId equals u.UserId
+                                       select new
+                                       {
+                                           e.EmployeeId,
+                                           UserName = u.Name,
+                                           UserPhone = u.Phone,
+                                           UserEmail = u.Email,
+                                           e.Specialty,
+                                           e.Salary,
+                                           e.StartDate
+
+                                       };
+
+            return View(employeeWithUserInfo.ToList());
+
+        }
+
+
+
+
+        // Servileri Listeleme
+        [HttpGet]
+        public IActionResult GetServices(int employeeId)
+        {
+            // Servis listesini getir
+
+
+
+            var allServices = _context.Services.ToList();
+            var assignedServices = _context.EmployeeServices
+                .Where(es => es.EmployeeId == employeeId)
+                .Select(es => es.ServiceId)
+                .ToList();
+
+            var serviceList = allServices.Select(service => new
+            {
+                ServiceId = service.ServiceId,
+                ServiceName = service.ServiceName,
+                IsSelected = assignedServices.Contains(service.ServiceId)  // Eğer servis atanmışsa , IsSelected true olacak
+            }).ToList();
+
+            return Json(serviceList);
+        }
+
+        //Seçili Servisleri Kaydet
+
+        [HttpPost]
+        public IActionResult SaveServices(int  employeeId, List<int> serviceIds)
+        {
+            // Mevcut kayıtları sil
+            var existingServices = _context.EmployeeServices
+                                           .Where(es => es.EmployeeId == employeeId);
+            _context.EmployeeServices.RemoveRange(existingServices);
+
+            // Yeni kayıtları ekle
+            var newServices = serviceIds.Select(serviceId => new EmployeeService
+            {
+                EmployeeId = employeeId,
+                ServiceId = serviceId
+            });
+
+            _context.EmployeeServices.AddRange(newServices);
+            _context.SaveChanges();
+
+            return Json(new { success = true });
+        }
+
+
+
+
+
+        //Employee Detayları
+        public async Task<IActionResult> EmployeeDetail(int employeeId)
+        {
+            var employee = _context.Employees
+                .Include(e=>e.User)   //Employee ile ilişkili User dahil edilir
+                .Include(e=>e.EmployeeServices)   //Employee ile ilişkili EmployeeService'leri dahil et
+                .ThenInclude(es=>es.Service)
+                .FirstOrDefault(e=>e.EmployeeId==employeeId);
+
+            if(employee == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EmployeeDetailsViewModel
+            {
+                Employee = employee,
+                Services = employee.EmployeeServices.Select(es => es.Service).ToList()
+            };
+
+
+            return View(model);
+        }
+
+
 
 
 

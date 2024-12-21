@@ -10,3 +10,8 @@
         .custom-sidebar a:hover {
             color: #FFD700; /* Bağlantıya gelindiğinde rengi */
         }
+
+
+.table-active {
+    background-color: #f5f5f5;
+}

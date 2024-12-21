@@ -14,6 +14,12 @@ namespace Randevu_Sistemi_Kuafor.Models
         [StringLength(50)]
         public string Specialty { get; set; }
 
+        //Null olabilir, sonradan editleme yapılabilir
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Salary { get; set; }
+
+        [Required]
+        public DateTime StartDate { get; set; }
         // İlişkiler
         [ForeignKey("UserId")]
         public User User { get; set; }
