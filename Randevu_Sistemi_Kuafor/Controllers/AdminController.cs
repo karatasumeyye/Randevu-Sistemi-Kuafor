@@ -240,6 +240,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
 
 
         //Employee Detayları
+        
         public async Task<IActionResult> EmployeeDetail(int employeeId)
         {
             var employee = _context.Employees
@@ -263,7 +264,89 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EmployeeDelete(int employeeId)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.User)   //User tablosu ile olan ilişkiden dolayı
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
+
+
+            if (employee == null) { 
+                return NotFound();
+            }
+
+           
+            // Employee kaydını silme işlemi , ilişkili olan tablolardan siliniyor
+            _context.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
+
+           
+            return RedirectToAction("AddEmployeeService", "Admin");
+        }
+
+
+        // Düzenleme Sayfasını Getir
+        [HttpGet]
+        public IActionResult EmployeeEdit(int employeeId)
+        {
+            var employee = _context.Employees
+                .Include(e => e.User) // Kullanıcı bilgilerini dahil et
+                .FirstOrDefault(e => e.EmployeeId == employeeId);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EmployeeEditViewModel
+            {
+                EmployeeId = employee.EmployeeId,
+                UserId = employee.UserId,
+                UserName = employee.User.Name,
+                UserPhone = employee.User.Phone,
+                UserEmail = employee.User.Email,
+                Salary = employee.Salary,
+                StartDate = employee.StartDate
+            };
+
+            return View(model);
+        }
+
+        // Düzenleme İşlemini Kaydet
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EmployeeEdit(EmployeeEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var employee = _context.Employees
+                .Include(e => e.User)
+                .FirstOrDefault(e => e.EmployeeId == model.EmployeeId);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            // Çalışanın bilgilerini güncelle
+            employee.Salary = model.Salary;
+            employee.StartDate = model.StartDate;
+
+            // Kullanıcı bilgilerini güncelle
+            employee.User.Name = model.UserName;
+            employee.User.Phone = model.UserPhone;
+            employee.User.Email = model.UserEmail;
+
+            _context.SaveChanges();
+
+            return RedirectToAction("AddEmployeeService", "Admin");
+        }
 
 
 

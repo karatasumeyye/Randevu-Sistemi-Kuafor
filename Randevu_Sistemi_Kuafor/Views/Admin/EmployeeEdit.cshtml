@@ -1,0 +1,51 @@
+﻿
+@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@model EmployeeEditViewModel
+
+@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2>Çalışan Düzenle</h2>
+
+<form asp-action="EmployeeEdit" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="EmployeeId" />
+
+    <div class="mb-3">
+        <label asp-for="UserName" class="form-label">Ad Soyad</label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="UserPhone" class="form-label">Telefon</label>
+        <input asp-for="UserPhone" class="form-control" />
+        <span asp-validation-for="UserPhone" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="UserEmail" class="form-label">E-posta</label>
+        <input asp-for="UserEmail" class="form-control" />
+        <span asp-validation-for="UserEmail" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Salary" class="form-label">Maaş</label>
+        <input asp-for="Salary" class="form-control" />
+        <span asp-validation-for="Salary" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="StartDate" class="form-label">Başlangıç Tarihi</label>
+        <input asp-for="StartDate" type="date" class="form-control" />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-action="AddEmployeeService" class="btn btn-secondary">İptal</a>
+</form>

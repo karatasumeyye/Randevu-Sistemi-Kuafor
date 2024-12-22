@@ -29,23 +29,30 @@
                         <!-- Servis Seç Butonu -->
                         <button type="button" class="btn btn-primary select-services-btn" data-id="@item.EmployeeId">Servis Seç</button>
                     
-                        <!-- Detay Butonu -->    
+                        <!-- Detay Butonu -->
                         <form asp-action="EmployeeDetail" asp-route-employeeId="@item.EmployeeId">
                             <button type="submit" class="btn btn-info detail-btn">Detay</button>
                         </form>
 
                         <!-- Düzenle Butonu -->
-                        <button type="button" class="btn btn-warning edit-btn" data-id="@item.EmployeeId">Düzenle</button>
-                 
+                        <form asp-action="EmployeeEdit" asp-route-employeeId="@item.EmployeeId">
+                             <button type="submit" class="btn btn-warning edit-btn">Düzenle</button>
+                        </form>
                   
                         <!-- Sil Butonu -->
-                        <button type="button" class="btn btn-danger delete-btn" data-id="@item.EmployeeId">Sil</button>
+                         <form asp-action="EmployeeDelete" asp-route-employeeId="@item.EmployeeId">
+                            <button type="submit" class="btn btn-danger delete-btn" data-id="@item.EmployeeId" onclick="return confirm('Are you sure you want to delete this employee?');">Sil</button>
+                        </form>
                     </div>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+
+
+<!-- Servis ekleme butonuna basıldığında açılan modal -->
 
 <div class="modal fade" id="serviceModal" tabindex="-1" aria-labelledby="serviceModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -67,6 +74,9 @@
         </div>
     </div>
 </div>
+
+
+
 
 
 @section Scripts {
@@ -129,6 +139,9 @@
                 });
             });
         });
+
+
+ 
 
     </script>
 }

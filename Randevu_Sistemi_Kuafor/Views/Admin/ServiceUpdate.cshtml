@@ -28,7 +28,7 @@
                     <div class="d-flex gap-2">
                         <button class="btn btn-warning" onclick="editService(@item.ServiceId, '@item.ServiceName', '@item.Duration', @item.Price)">Edit</button>
 
-                        <form asp-action="Detail" asp-roue-id="@item.ServiceId">
+                        <form asp-action="Detail" asp-route-id="@item.ServiceId">
                             <button type="submit" class="btn btn-success">
                                 Details
                             </button>
