@@ -1,0 +1,122 @@
+﻿<div class="mb-3">
+    <label for="service" class="form-label">İşlem Seçin</label>
+    <select class="form-control" id="service">
+        <option value="">Bir işlem seçin</option>
+        @foreach (var service in Model)
+        {
+            <option value="@service.ServiceId">@service.ServiceName</option>
+        }
+    </select>
+</div>
+
+<div class="mb-3">
+    <label for="employees" class="form-label">Çalışanlar</label>
+    <ul id="employees" class="list-group">
+        <li class="list-group-item">Bir işlem seçin...</li>
+    </ul>
+</div>
+
+<div>
+    <button type="submit" id="select-button">Tarih Seç</button>
+</div>
+
+
+<div class="col-md-8 col-sm-12 col-xs-12 add_bottom_15">
+    <h2>Randevu Saatini Seçin</h2>
+    <form method="post" action="/randevu/olustur">
+        <div class="form-group">
+            <label for="date">Tarih Seçin:</label>
+            <input type="text" id="datepicker" name="date" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label> Saat Seçin:</label>
+            <table class="table">
+                <tr>
+                    <td><button type="button" class="btn btn-info">09:00</button></td>
+                    <td><button type="button" class="btn btn-info">09:30</button></td>
+                    <td><button type="button" class="btn btn-info">10:00</button></td>
+                </tr>
+                <tr>
+                    <td><button type="button" class="btn btn-info">10:30</button></td>
+                    <td><button type="button" class="btn btn-info">11:00</button></td>
+                    <td><button type="button" class="btn btn-info">11:30</button></td>
+                </tr>
+                <!-- Devamı için diğer saat dilimlerini ekleyebilirsiniz -->
+            </table>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-success">Randevu Oluştur</button>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    <script>
+        // İşlem seçildiğinde çalışanları getir
+        $('#service').change(function () {
+            const serviceId = $(this).val();
+            const employeeList = $('#employees');
+
+            if (serviceId) {
+                $.ajax({
+                    url: '/Appointment/GetEmployeesByService',
+                    type: 'GET',
+                    data: { serviceId: serviceId },
+                    success: function (employees) {
+                        employeeList.empty();
+
+                        if (employees.length > 0) {
+                            employees.forEach(employee => {
+                                const employeeItem = $('<li>')
+                                    .addClass('list-group-item')
+                                    .text(employee.name)
+                                    .data('id', employee.employeeId)
+                                    .click(function () {
+                                        $('#employees li').removeClass('selected');
+                                        $(this).addClass('selected');
+                                        $('#show-schedule-btn').prop('disabled', false);
+                                    });
+
+                                employeeList.append(employeeItem);
+                            });
+                        } else {
+                            employeeList.append('<li class="list-group-item">Bu işlemi yapabilen çalışan yok.</li>');
+                        }
+                    },
+                    error: function () {
+                        employeeList.empty();
+                        employeeList.append('<li class="list-group-item">Bir hata oluştu.</li>');
+                    }
+                });
+            } else {
+                employeeList.empty();
+                employeeList.append('<li class="list-group-item">Bir işlem seçin...</li>');
+            }
+        });
+
+
+        document.getElementById("select-button").addEventListener("click", function (event) {
+            event.preventDefault();
+            document.getElementById("randevu-ekrani").style.display = "block"; // Randevu ekranını göster
+        });
+
+
+
+
+        // Tarih seçici
+        $('#datepicker').datepicker({
+            format: 'mm/dd/yyyy',
+            startDate: new Date()
+        });
+
+        // Saat seçici
+        $('#timepicker').timepicker({
+            showMeridian: false,
+            minuteStep: 30,
+            defaultTime: '09:00'
+        });
+      
+    </script>
+}

@@ -187,14 +187,11 @@ namespace Randevu_Sistemi_Kuafor.Controllers
 
 
 
-
         // Servileri Listeleme
         [HttpGet]
         public IActionResult GetServices(int employeeId)
         {
             // Servis listesini getir
-
-
 
             var allServices = _context.Services.ToList();
             var assignedServices = _context.EmployeeServices
@@ -234,9 +231,6 @@ namespace Randevu_Sistemi_Kuafor.Controllers
 
             return Json(new { success = true });
         }
-
-
-
 
 
         //Employee Detayları
@@ -287,66 +281,6 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return RedirectToAction("AddEmployeeService", "Admin");
         }
 
-
-        // Düzenleme Sayfasını Getir
-        [HttpGet]
-        public IActionResult EmployeeEdit(int employeeId)
-        {
-            var employee = _context.Employees
-                .Include(e => e.User) // Kullanıcı bilgilerini dahil et
-                .FirstOrDefault(e => e.EmployeeId == employeeId);
-
-            if (employee == null)
-            {
-                return NotFound();
-            }
-
-            var model = new EmployeeEditViewModel
-            {
-                EmployeeId = employee.EmployeeId,
-                UserId = employee.UserId,
-                UserName = employee.User.Name,
-                UserPhone = employee.User.Phone,
-                UserEmail = employee.User.Email,
-                Salary = employee.Salary,
-                StartDate = employee.StartDate
-            };
-
-            return View(model);
-        }
-
-        // Düzenleme İşlemini Kaydet
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult EmployeeEdit(EmployeeEditViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var employee = _context.Employees
-                .Include(e => e.User)
-                .FirstOrDefault(e => e.EmployeeId == model.EmployeeId);
-
-            if (employee == null)
-            {
-                return NotFound();
-            }
-
-            // Çalışanın bilgilerini güncelle
-            employee.Salary = model.Salary;
-            employee.StartDate = model.StartDate;
-
-            // Kullanıcı bilgilerini güncelle
-            employee.User.Name = model.UserName;
-            employee.User.Phone = model.UserPhone;
-            employee.User.Email = model.UserEmail;
-
-            _context.SaveChanges();
-
-            return RedirectToAction("AddEmployeeService", "Admin");
-        }
 
 
 

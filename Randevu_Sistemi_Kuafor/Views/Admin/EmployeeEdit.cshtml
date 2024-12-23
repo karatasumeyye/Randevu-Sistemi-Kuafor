@@ -1,51 +1,127 @@
-﻿
+﻿@model IEnumerable<Randevu_Sistemi_Kuafor.Models.Employee>
+
+@{
+    ViewData["Title"] = "Employee Edit";
+}
+
 @{
     Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
 
-@model EmployeeEditViewModel
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.User.Name)</th>
+            <th>@Html.DisplayNameFor(model => model.User.Email)</th>
+            <th>@Html.DisplayNameFor(model => model.User.Phone)</th>
+            <th>@Html.DisplayNameFor(model => model.Specialty)</th>
+            <th>@Html.DisplayNameFor(model => model.Salary)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr id="employee-row-@item.EmployeeId">
+                <td>@Html.DisplayFor(modelItem => item.User.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.User.Email)</td>
+                <td>@Html.DisplayFor(modelItem => item.User.Phone)</td>
+                <td>@Html.DisplayFor(modelItem => item.Specialty)</td>
+                <td>@Html.DisplayFor(modelItem => item.Salary)</td>
+                <td>
+                    <button class="btn btn-warning" onclick="editEmployee(@item.EmployeeId, '@item.User.Name', '@item.User.Email', '@item.User.Phone', '@item.Specialty', @item.Salary)">Edit</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
-@{
-    Layout = "~/Views/Shared/AdminLayout.cshtml";
+<!-- Modal for Edit Employee -->
+<div class="modal" tabindex="-1" id="editModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Employee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="mb-3">
+                        <label for="editEmployeeName" class="form-label">Employee Name</label>
+                        <input type="text" class="form-control" id="editEmployeeName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPhone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="editPhone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editSpecialty" class="form-label">Specialty</label>
+                        <input type="text" class="form-control" id="editSpecialty">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editSalary" class="form-label">Salary</label>
+                        <input type="text" class="form-control" id="editSalary">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editEmployee(employeeId, name, email, phone, specialty, salary) {
+            // Fill the modal with existing data
+            $('#editEmployeeName').val(name);
+            $('#editEmail').val(email);
+            $('#editPhone').val(phone);
+            $('#editSpecialty').val(specialty);
+            $('#editSalary').val(salary);
+
+            // Show modal
+            $('#editModal').modal('show');
+
+            // On form submit
+            $('#editForm').off('submit').on('submit', function (e) {
+                e.preventDefault();
+
+                var updatedEmployee = {
+                    EmployeeId: employeeId,
+                    User: {
+                        Name: $('#editEmployeeName').val(),
+                        Email: $('#editEmail').val(),
+                        Phone: $('#editPhone').val()
+                    },
+                    Specialty: $('#editSpecialty').val(),
+                    Salary: $('#editSalary').val()
+                };
+
+                // Send updated data to the server
+                $.ajax({
+                    url: '/Admin/EmployeeEdit', // Adjust the route as per your controller
+                    type: 'POST',
+                    data: updatedEmployee,
+                    success: function (response) {
+                        // Update table row with new data
+                        $('#employee-row-' + employeeId).find('td').eq(0).text(updatedEmployee.User.Name);
+                        $('#employee-row-' + employeeId).find('td').eq(1).text(updatedEmployee.User.Email);
+                        $('#employee-row-' + employeeId).find('td').eq(2).text(updatedEmployee.User.Phone);
+                        $('#employee-row-' + employeeId).find('td').eq(3).text(updatedEmployee.Specialty);
+                        $('#employee-row-' + employeeId).find('td').eq(4).text(updatedEmployee.Salary);
+
+                        // Close modal
+                        $('#editModal').modal('hide');
+                    },
+                    error: function () {
+                        alert('An error occurred while updating the employee.');
+                    }
+                });
+            });
+        }
+    </script>
 }
-
-<h2>Çalışan Düzenle</h2>
-
-<form asp-action="EmployeeEdit" method="post">
-    @Html.AntiForgeryToken()
-
-    <input type="hidden" asp-for="EmployeeId" />
-
-    <div class="mb-3">
-        <label asp-for="UserName" class="form-label">Ad Soyad</label>
-        <input asp-for="UserName" class="form-control" />
-        <span asp-validation-for="UserName" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="UserPhone" class="form-label">Telefon</label>
-        <input asp-for="UserPhone" class="form-control" />
-        <span asp-validation-for="UserPhone" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="UserEmail" class="form-label">E-posta</label>
-        <input asp-for="UserEmail" class="form-control" />
-        <span asp-validation-for="UserEmail" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Salary" class="form-label">Maaş</label>
-        <input asp-for="Salary" class="form-control" />
-        <span asp-validation-for="Salary" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="StartDate" class="form-label">Başlangıç Tarihi</label>
-        <input asp-for="StartDate" type="date" class="form-control" />
-        <span asp-validation-for="StartDate" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Kaydet</button>
-    <a asp-action="AddEmployeeService" class="btn btn-secondary">İptal</a>
-</form>
