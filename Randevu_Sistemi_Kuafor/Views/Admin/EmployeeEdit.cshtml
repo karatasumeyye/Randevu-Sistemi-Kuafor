@@ -13,7 +13,7 @@
         <tr>
             <th>@Html.DisplayNameFor(model => model.User.Name)</th>
             <th>@Html.DisplayNameFor(model => model.User.Email)</th>
-            <th>@Html.DisplayNameFor(model => model.User.Phone)</th>
+            <th>@Html.DisplayNameFor(model => model.User.PhoneNumber)</th>
             <th>@Html.DisplayNameFor(model => model.Specialty)</th>
             <th>@Html.DisplayNameFor(model => model.Salary)</th>
             <th></th>
@@ -25,11 +25,11 @@
             <tr id="employee-row-@item.EmployeeId">
                 <td>@Html.DisplayFor(modelItem => item.User.Name)</td>
                 <td>@Html.DisplayFor(modelItem => item.User.Email)</td>
-                <td>@Html.DisplayFor(modelItem => item.User.Phone)</td>
+                <td>@Html.DisplayFor(modelItem => item.User.PhoneNumber)</td>
                 <td>@Html.DisplayFor(modelItem => item.Specialty)</td>
                 <td>@Html.DisplayFor(modelItem => item.Salary)</td>
                 <td>
-                    <button class="btn btn-warning" onclick="editEmployee(@item.EmployeeId, '@item.User.Name', '@item.User.Email', '@item.User.Phone', '@item.Specialty', @item.Salary)">Edit</button>
+                    <button class="btn btn-warning" onclick="editEmployee(@item.EmployeeId, '@item.User.Name', '@item.User.Email', '@item.User.PhoneNumber', '@item.Specialty', @item.Salary)">Edit</button>
                 </td>
             </tr>
         }

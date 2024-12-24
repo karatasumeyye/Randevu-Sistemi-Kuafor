@@ -9,7 +9,7 @@ namespace Randevu_Sistemi_Kuafor.Models
         public int AppointmentId { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public string UserId { get; set; } // IdentityUser.Id ile ilişkilendirilecek
 
         [Required]
         public int ServiceId { get; set; }
@@ -32,7 +32,8 @@ namespace Randevu_Sistemi_Kuafor.Models
 
         // İlişkiler
         [ForeignKey("UserId")]
-        public User User { get; set; }
+        public ApplicationUser User { get; set; }
+    
 
         [ForeignKey("EmployeeId")]
         public Employee Employee { get; set; }

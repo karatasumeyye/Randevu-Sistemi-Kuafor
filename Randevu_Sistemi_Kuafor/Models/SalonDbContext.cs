@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Randevu_Sistemi_Kuafor.Models
 {
-    public class SalonDbContext: DbContext
+    public class SalonDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
-        public SalonDbContext(DbContextOptions<SalonDbContext> options) : base(options)
+        public SalonDbContext(DbContextOptions<SalonDbContext> options)
+             : base(options)
         {
         }
 
-        public DbSet<User> Users { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<EmployeeLeave> EmployeeLeaves { get; set; }

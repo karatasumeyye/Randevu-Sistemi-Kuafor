@@ -139,7 +139,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddEmployee(int userId, string specialty,decimal salary, DateTime startDate)
+        public IActionResult AddEmployee(string userId, string specialty,decimal salary, DateTime startDate)
         {
             var user = _context.Users.Find(userId);
             if (user == null)
@@ -149,7 +149,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
 
             var employee = new Employee
             {
-                UserId = user.UserId,
+                UserId =user.Id,
                 Specialty = specialty,
                 Salary=salary,
                 StartDate = startDate.ToUniversalTime()
@@ -168,12 +168,12 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         public IActionResult AddEmployeeService()
         {
             var employeeWithUserInfo = from e in _context.Employees
-                                       join u in _context.Users on e.UserId equals u.UserId
+                                       join u in _context.Users on e.UserId equals u.Id
                                        select new
                                        {
                                            e.EmployeeId,
                                            UserName = u.Name,
-                                           UserPhone = u.Phone,
+                                           UserPhone = u.PhoneNumber,  // PhoneNumber kullanımı
                                            UserEmail = u.Email,
                                            e.Specialty,
                                            e.Salary,

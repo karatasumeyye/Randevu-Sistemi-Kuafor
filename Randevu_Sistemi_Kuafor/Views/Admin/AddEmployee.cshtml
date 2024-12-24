@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Randevu_Sistemi_Kuafor.Models.User>
+﻿@model IEnumerable<Randevu_Sistemi_Kuafor.Models.ApplicationUser>
 
 @{
     ViewData["Title"] = "AddEmployee";
@@ -18,16 +18,16 @@
         <tr>
             <th>@Html.DisplayNameFor(m => m.First().Name)</th>
             <th>@Html.DisplayNameFor(m => m.First().Email)</th>
-            <th>@Html.DisplayNameFor(m => m.First().Phone)</th>
+            <th>@Html.DisplayNameFor(m => m.First().PhoneNumber)</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
-            <tr class="table-row" data-id="@item.UserId">
+            <tr class="table-row" data-id="@item.Id">
                 <td>@item.Name</td>
                 <td>@item.Email</td>
-                <td>@item.Phone</td>
+                <td>@item.PhoneNumber</td>
             </tr>
         }
     </tbody>

@@ -9,7 +9,7 @@ namespace Randevu_Sistemi_Kuafor.Models
         public int EmployeeId { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public string UserId { get; set; } // IdentityUser.Id ile ilişkilendirilecek
 
         [StringLength(50)]
         public string Specialty { get; set; }
@@ -20,9 +20,10 @@ namespace Randevu_Sistemi_Kuafor.Models
 
         [Required]
         public DateTime StartDate { get; set; }
+
         // İlişkiler
         [ForeignKey("UserId")]
-        public User User { get; set; }
+        public ApplicationUser User { get; set; }
 
         public ICollection<Appointment> Appointments { get; set; }
         public ICollection<EmployeeService> EmployeeServices { get; set; }

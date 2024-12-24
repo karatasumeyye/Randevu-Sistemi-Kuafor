@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Randevu_Sistemi_Kuafor.Models;
 
@@ -9,20 +11,20 @@ builder.Services.AddDbContext<SalonDbContext>(options =>
     options.UseNpgsql("Host=localhost;Port=5432;Database=Randevu_Sistemi_Kuafor_DB;Username=postgres;Password=1234"));
 
 
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddEntityFrameworkStores<SalonDbContext>()
+     .AddDefaultTokenProviders();
 
-// Session desteði ekleniyor
-builder.Services.AddSession(options =>
-{
-    options.Cookie.HttpOnly = true; // Güvenlik için cookie yalnýzca HTTP üzerinden eriþilebilir.
-    options.Cookie.IsEssential = true; // Cookie'nin kritik olduðunu belirtir.
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Oturum süresinin zaman aþýmý.
-});
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 
-
 var app = builder.Build();
+
+// Roller yoksa, onlarý oluþtur
+// Roller veritabanýnda var mý, kontrol et
+
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -32,16 +34,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseSession();  //oturumlarý kullanabilmek için 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers(); // Controller'larý haritalama
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+
