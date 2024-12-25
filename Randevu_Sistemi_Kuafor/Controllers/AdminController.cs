@@ -1,17 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Randevu_Sistemi_Kuafor.Models;
 
 namespace Randevu_Sistemi_Kuafor.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
 
         private readonly SalonDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AdminController(SalonDbContext context)
+        public AdminController(SalonDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
 
@@ -138,30 +143,64 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return View(users);
         }
 
+
+
         [HttpPost]
-        public IActionResult AddEmployee(string userId, string specialty,decimal salary, DateTime startDate)
+        // UserManager işlemleriasenkron olduğu için async ve await anahtar kelimeleri kullanılır
+        public async Task<IActionResult> AddEmployee(string userId, string specialty, decimal salary, DateTime startDate)
         {
-            var user = _context.Users.Find(userId);
+            // UserManager üzerinden kullanıcıyı al
+            var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return NotFound();
+                TempData["Error"] = "User not found.";
+                return RedirectToAction("AddEmployee");
             }
 
+            // Kullanıcının mevcut rollerini sil
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Any())
+            {
+               var removeResult = await _userManager.RemoveFromRolesAsync(user, roles);
+
+                if (!removeResult.Succeeded)
+                {
+                    TempData["Error"] = "Kullanıcının mevcut rolleri kaldırılırken bir hata oluştu.";
+                    return RedirectToAction("AddEmployee");
+                }
+            }
+
+            // Kullanıcıya "Employee" rolü ekle
+            var addToRoleResult = await _userManager.AddToRoleAsync(user, "Employee");
+            if (!addToRoleResult.Succeeded)
+            {
+                var errorMessage = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
+                TempData["Error"] = $"User's role couldn't be updated: {errorMessage}";
+                return RedirectToAction("AddEmployee");
+            }
+
+            // Employee kaydı oluştur
             var employee = new Employee
             {
-                UserId =user.Id,
+                UserId = user.Id,
                 Specialty = specialty,
-                Salary=salary,
+                Salary = salary,
                 StartDate = startDate.ToUniversalTime()
             };
 
-            _context.Employees.Add(employee);
-            _context.SaveChanges();
+            try
+            {
+                _context.Employees.Add(employee);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = "Employee added successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error while saving employee: {ex.Message}";
+            }
 
-            TempData["Message"] = "Employee added successfully!";
             return RedirectToAction("AddEmployee", "Admin");
         }
-
 
         //Employee Tablosunndakileri listeleme
         [HttpGet]

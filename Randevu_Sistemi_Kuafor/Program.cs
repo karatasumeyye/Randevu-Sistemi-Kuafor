@@ -1,53 +1,116 @@
-using Microsoft.AspNetCore.Components.Routing;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Randevu_Sistemi_Kuafor.Models;
 
-var builder = WebApplication.CreateBuilder(args);
-
-
-// Veritabaný baðlantýsýný
-builder.Services.AddDbContext<SalonDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Port=5432;Database=Randevu_Sistemi_Kuafor_DB;Username=postgres;Password=1234"));
-
-
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
-    .AddEntityFrameworkStores<SalonDbContext>()
-     .AddDefaultTokenProviders();
-
-builder.Services.AddControllersWithViews();
-
-
-var app = builder.Build();
-
-// Roller yoksa, onlarý oluþtur
-// Roller veritabanýnda var mý, kontrol et
-
-
-
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+namespace Randevu_Sistemi_Kuafor
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    public class Program
+    {
+        public static async Task Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            // Add services to the container.
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            builder.Services.AddDbContext<SalonDbContext>(options =>
+                options.UseNpgsql(connectionString));
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+            //    builder.Services.AddDefaultIdentity<UserDetails>(options => options.SignIn.RequireConfirmedAccount = true)
+            //       .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+                .AddDefaultTokenProviders()
+                .AddDefaultUI()
+                .AddEntityFrameworkStores<SalonDbContext>();
+            builder.Services.AddControllersWithViews();
+
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequiredLength = 5;
+
+                options.Lockout.MaxFailedAccessAttempts = 3;
+            });
+
+            var app = builder.Build();
+
+
+            // Admin kullanÄ±cÄ± ve rolÃ¼ oluÅŸtur
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+
+                await SeedAdminAsync(userManager, roleManager);
+            }
+
+
+
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseMigrationsEndPoint();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+            app.MapRazorPages();
+
+            app.Run();
+        }
+        private static async Task SeedAdminAsync(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        {
+            // Admin rolÃ¼ oluÅŸtur
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Admin" });
+            }
+
+            // Admin kullanÄ±cÄ± oluÅŸtur
+            var adminEmail = "B221210005@sakarya.edu.tr";
+            var adminPassword = "Sau123";
+
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
+            {
+                adminUser = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    Name = "Admin KullanÄ±cÄ±"
+                };
+
+                var result = await userManager.CreateAsync(adminUser, adminPassword);
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+                else
+                {
+                    throw new Exception($"Admin kullanÄ±cÄ± oluÅŸturulamadÄ±: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+        }
+    }
 }
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers(); // Controller'larý haritalama
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.Run();
-
-
-

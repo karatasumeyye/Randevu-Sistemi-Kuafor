@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 namespace Randevu_Sistemi_Kuafor.Models
 {
     public class ApplicationUser:IdentityUser
     {
         // User tablosundaki özel alanlar buraya taşınır
+        [Required]
+        [Display(Name = "Full Name")]
         public String Name { get; set; } // Eski "Name" alanı
     }
+
 }
 
 
