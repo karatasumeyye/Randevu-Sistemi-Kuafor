@@ -28,7 +28,7 @@ namespace Randevu_Sistemi_Kuafor.Models
         public decimal Price { get; set; }
 
         [Required]
-      //  public AppointmentStatus Status { get; set; }
+        public AppointmentStatus Status { get; set; }
 
         // İlişkiler
         [ForeignKey("UserId")]
@@ -40,5 +40,14 @@ namespace Randevu_Sistemi_Kuafor.Models
 
         [ForeignKey("ServiceId")]
         public Service Service { get; set; }
+    }
+
+
+    public enum AppointmentStatus
+    {
+        Pending,  //Askıda
+        Confirmed,  //Onaylandı
+        Completed,   // Tamamlanmış
+        Cancelled    // İptal edildi
     }
 }

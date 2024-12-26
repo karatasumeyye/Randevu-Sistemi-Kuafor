@@ -11,112 +11,228 @@
 
 <div class="mb-3">
     <label for="employees" class="form-label">Çalışanlar</label>
+
     <ul id="employees" class="list-group">
         <li class="list-group-item">Bir işlem seçin...</li>
     </ul>
 </div>
 
-<div>
-    <button type="submit" id="select-button">Tarih Seç</button>
+<div class="form-group">
+    <label for="datepicker">Tarih Seçin:</label>
+    <input type="text" id="datepicker" name="date" class="form-control" required />
 </div>
 
 
-<div class="col-md-8 col-sm-12 col-xs-12 add_bottom_15">
-    <h2>Randevu Saatini Seçin</h2>
-    <form method="post" action="/randevu/olustur">
-        <div class="form-group">
-            <label for="date">Tarih Seçin:</label>
-            <input type="text" id="datepicker" name="date" class="form-control" required />
-        </div>
-        <div class="form-group">
-            <label> Saat Seçin:</label>
-            <table class="table">
-                <tr>
-                    <td><button type="button" class="btn btn-info">09:00</button></td>
-                    <td><button type="button" class="btn btn-info">09:30</button></td>
-                    <td><button type="button" class="btn btn-info">10:00</button></td>
-                </tr>
-                <tr>
-                    <td><button type="button" class="btn btn-info">10:30</button></td>
-                    <td><button type="button" class="btn btn-info">11:00</button></td>
-                    <td><button type="button" class="btn btn-info">11:30</button></td>
-                </tr>
-                <!-- Devamı için diğer saat dilimlerini ekleyebilirsiniz -->
-            </table>
-        </div>
-
-        <div>
-            <button type="submit" class="btn btn-success">Randevu Oluştur</button>
-        </div>
-    </form>
+<!-- Müsait saatler için butonlar listesi -->
+<div class="mb-3">
+    <label for="availableTimes" class="form-label">Müsait Saatler</label>
+    <div id="availableTimes" class="btn-group-vertical" role="group">
+        <!-- Müsait saatler burada dinamik olarak yüklenecek -->
+    </div>
 </div>
+
+<!-- Kullanıcı seçilen saat burada görüntülenecek -->
+<input type="hidden" id="selectedTime" name="selectedTime" />
+
+
+<!-- Randevu Özeti -->
+<div id="appointmentSummary" style="display:none;">
+    <h4>Randevu Özeti</h4>
+    <p><strong>İşlem:</strong> <span id="serviceName"></span></p>
+    <p><strong>Çalışan:</strong> <span id="employeeName"></span></p>
+    <p><strong>Tarih ve Saat:</strong> <span id="appointmentTime"></span></p>
+    <p><strong>Ücret:</strong> <span id="serviceCost"></span></p>
+    <button id="saveAppointment" class="btn btn-success">Randevuyu Kaydet</button>
+    <button id="cancelAppointment" class="btn btn-danger">İptal Et</button>
+</div>
+
+<!-- Randevu Oluştur Butonu -->
+<button id="createAppointment" class="btn btn-primary">Randevu Oluştur</button>
 
 
 @section Scripts {
     <script>
-        // İşlem seçildiğinde çalışanları getir
-        $('#service').change(function () {
-            const serviceId = $(this).val();
-            const employeeList = $('#employees');
+        $(document).ready(function () {
+            // İşlem seçildiğinde çalışanları getir
+            $('#service').change(function () {
+                const serviceId = $(this).val();
+                const employeeList = $('#employees');
 
-            if (serviceId) {
+                if (serviceId) {
+                    $.ajax({
+                        url: '/Appointment/GetEmployeesByService',
+                        type: 'GET',
+                        data: { serviceId: serviceId },
+                        success: function (employees) {
+                            employeeList.empty();
+                            if (employees && employees.length > 0) {
+                                employees.forEach(employee => {
+                                    const employeeItem = $('<li>')
+                                        .addClass('list-group-item')
+                                        .text(employee.name)
+                                        .data('id', employee.employeeId)
+                                        .click(function () {
+                                            $('#employees li').removeClass('selected');
+                                            $(this).addClass('selected');
+
+                                            const employeeId = $(this).data('id');
+                                            console.log("Seçilen Çalışan ID:", employeeId);
+                                        });
+
+                                    employeeList.append(employeeItem);
+                                });
+                            } else {
+                                employeeList.append('<li class="list-group-item">Bu işlemi yapabilen çalışan yok.</li>');
+                            }
+                        },
+                        error: function () {
+                            employeeList.empty();
+                            employeeList.append('<li class="list-group-item">Bir hata oluştu.</li>');
+                        }
+                    });
+                } else {
+                    employeeList.empty();
+                    employeeList.append('<li class="list-group-item">Bir işlem seçin...</li>');
+                }
+            });
+
+            // Tarih input'una tıklayınca takvimi aç
+            $('#datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                startDate: new Date(),
+                autoclose: true,
+                todayHighlight: true
+            });
+
+            // Kullanıcı tarih ve çalışan seçtikten sonra müsait saatleri getir
+            $('#datepicker, #employees').on('change click', function () {
+                const serviceId = $('#service').val();
+                const employeeId = $('#employees .selected').data('id');
+                const date = $('#datepicker').val();
+
+                if (serviceId && employeeId && date) {
+                    $.ajax({
+                        url: '/Appointment/GetAvailableTimes',
+                        type: 'GET',
+                        data: { serviceId: serviceId, employeeId: employeeId, date: date },
+                        success: function (data) {
+                            const timeList = $('#availableTimes');
+                            timeList.empty();
+
+                            if (!data || !data.availableTimes) {
+                                console.error("API yanıtı beklenen formatta değil:", data);
+                                timeList.append('<p class="text-danger">Bir hata oluştu, saatler alınamadı.</p>');
+                                return;
+                            }
+
+                            const availableTimes = data.availableTimes;
+                            if (availableTimes.length > 0) {
+                                availableTimes.forEach(function (time) {
+                                    const timeButton = $('<button>')
+                                        .addClass('btn btn-primary mb-2')
+                                        .text(time)
+                                        .click(function () {
+                                            $('#selectedTime').val(time);
+                                            console.log("Seçilen Saat:", time);
+                                            $('#availableTimes button').removeClass('btn-success').addClass('btn-primary');
+                                            $(this).removeClass('btn-primary').addClass('btn-success');
+                                        });
+
+                                    timeList.append(timeButton);
+                                });
+                            } else {
+                                timeList.append('<p class="text-danger">Bu tarihte müsait saat yok.</p>');
+                            }
+                        },
+                        error: function () {
+                            const timeList = $('#availableTimes');
+                            timeList.empty();
+                            timeList.append('<p class="text-danger">Bir hata oluştu, lütfen tekrar deneyin.</p>');
+                        }
+                    });
+                }
+            });
+
+            // Kullanıcı tarih ve saat seçtikten sonra özet kısmını göster
+            $('#createAppointment').click(function () {
+                const serviceId = $('#service').val();
+                const employeeId = $('#employees .selected').data('id');
+                const date = $('#datepicker').val();
+                const time = $('#selectedTime').val();
+
+                // Çalışan seçilip seçilmediğini kontrol et
+                if (!employeeId) {
+                    alert("Lütfen bir çalışan seçin.");
+                    return;
+                }
+
+                if (serviceId && employeeId && date && time) {
+                    $.ajax({
+                        url: '/Appointment/ConfirmAppointment',
+                        type: 'POST',
+                        data: {
+                            serviceId: serviceId,
+                            employeeId: employeeId,
+                            date: date,
+                            time: time
+                        },
+                        success: function (response) {
+                            console.log(response); // Yanıtı kontrol edin
+                            if (response.success) {
+                                // Randevu özetini güncelle
+                                $('#serviceName').text(response.serviceName);
+                                $('#employeeName').text(response.employeeName);
+                                $('#appointmentTime').text(response.appointmentTime);
+                                $('#serviceCost').text(response.serviceCost);
+
+                                // Özet kısmını göster
+                                $('#appointmentSummary').show();
+                            } else {
+                                alert('Bir hata oluştu: ' + response.error);
+                            }
+                        },
+                        error: function () {
+                            alert('Bir hata oluştu, lütfen tekrar deneyin.');
+                        }
+                    });
+                }
+            });
+
+            // Randevuyu kaydet butonuna tıklanırsa
+            $('#saveAppointment').click(function () {
+                const serviceId = $('#service').val();
+                const employeeId = $('#employees .selected').data('id');
+                const date = $('#datepicker').val();
+                const time = $('#selectedTime').val();
+
                 $.ajax({
-                    url: '/Appointment/GetEmployeesByService',
-                    type: 'GET',
-                    data: { serviceId: serviceId },
-                    success: function (employees) {
-                        employeeList.empty();
-
-                        if (employees.length > 0) {
-                            employees.forEach(employee => {
-                                const employeeItem = $('<li>')
-                                    .addClass('list-group-item')
-                                    .text(employee.name)
-                                    .data('id', employee.employeeId)
-                                    .click(function () {
-                                        $('#employees li').removeClass('selected');
-                                        $(this).addClass('selected');
-                                        $('#show-schedule-btn').prop('disabled', false);
-                                    });
-
-                                employeeList.append(employeeItem);
-                            });
+                    url: '/Appointment/SaveAppointment',
+                    type: 'POST',
+                    data: {
+                        serviceId: serviceId,
+                        employeeId: employeeId,
+                        date: date,
+                        time: time
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Randevunuz başarıyla kaydedildi.');
+                            window.location.href = '/Randevu/Onay'; // Örneğin onay sayfasına yönlendirme
                         } else {
-                            employeeList.append('<li class="list-group-item">Bu işlemi yapabilen çalışan yok.</li>');
+                            alert('Bir hata oluştu: ' + response.error);
                         }
                     },
                     error: function () {
-                        employeeList.empty();
-                        employeeList.append('<li class="list-group-item">Bir hata oluştu.</li>');
+                        alert('Bir hata oluştu, lütfen tekrar deneyin.');
                     }
                 });
-            } else {
-                employeeList.empty();
-                employeeList.append('<li class="list-group-item">Bir işlem seçin...</li>');
-            }
+            });
+
+            // Randevuyu iptal et butonuna tıklanırsa
+            $('#cancelAppointment').click(function () {
+                $('#appointmentSummary').hide();
+            });
         });
 
-
-        document.getElementById("select-button").addEventListener("click", function (event) {
-            event.preventDefault();
-            document.getElementById("randevu-ekrani").style.display = "block"; // Randevu ekranını göster
-        });
-
-
-
-
-        // Tarih seçici
-        $('#datepicker').datepicker({
-            format: 'mm/dd/yyyy',
-            startDate: new Date()
-        });
-
-        // Saat seçici
-        $('#timepicker').timepicker({
-            showMeridian: false,
-            minuteStep: 30,
-            defaultTime: '09:00'
-        });
-      
     </script>
 }

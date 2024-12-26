@@ -254,7 +254,7 @@ section,
     .hero p {
         font-size: 18px;
     }
-
+}
 
 
 
@@ -306,7 +306,7 @@ section,
     }
 
 
-   /* Randevu Tarih/saat */
+    /* Randevu Tarih/saat */
 
     #schedule-section {
         margin-top: 20px;
@@ -315,3 +315,12 @@ section,
         border-radius: 5px;
         background-color: #f9f9f9;
     }
+
+
+    .selected {
+        background-color: #f0f0f0; /* Seçilen çalýþanýn arka plan rengini deðiþtir */
+        font-weight: bold; /* Seçilen çalýþanýn fontunu kalýn yap */
+    }
+
+
+    
