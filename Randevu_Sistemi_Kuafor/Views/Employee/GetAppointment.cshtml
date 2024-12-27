@@ -1,0 +1,133 @@
+﻿@model IEnumerable<Randevu_Sistemi_Kuafor.Models.Appointment>
+
+@{
+    ViewData["Title"] = "GetAppointment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>GetAppointment</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.AppointmentDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+           
+            <th>
+                @Html.DisplayNameFor(model => model.User.Name)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Service)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.AppointmentDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateTime)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.User.Name)
+            </td>
+           
+            <td>
+                @Html.DisplayFor(modelItem => item.Service.ServiceName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @if (item.Status == AppointmentStatus.Pending)
+                {
+                  <button class="btn btn-success approve-btn" data-id="@item.AppointmentId">Onayla</button>
+                  <button class="btn btn-danger cancel-btn" data-id="@item.AppointmentId"> İptal Et </button>
+                }
+                    else if (item.Status == AppointmentStatus.Confirmed)
+                    {
+                        <button class="btn btn-danger cancel-btn" data-id="@item.AppointmentId">İptal Et</button>
+                    }
+            </td>
+
+        </tr>
+}
+    </tbody>
+</table>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('.approve-btn').click(function () {
+                const appointmentId = $(this).data('id');
+                const button = $(this);
+
+                $.ajax({
+                    url: '/Employee/ApproveAppointment',
+                    type: 'POST',
+                    data: { appointmentId: appointmentId },
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Randevu başarıyla onaylandı.');
+                            button.closest('tr').find('.badge').removeClass('bg-warning').addClass('bg-success').text('Onaylandı');
+                            button.remove(); // Butonu kaldır
+                        } else {
+                            alert('Hata: ' + response.error);
+                        }
+                    },
+                    error: function () {
+                        alert('Bir hata oluştu, lütfen tekrar deneyin.');
+                    }
+                });
+            });
+     
+
+        // İptal Et butonu
+        $('.cancel-btn').click(function () {
+            const appointmentId = $(this).data('id');
+            const button = $(this);
+
+            $.ajax({
+                url: '/Employee/CancelAppointment',
+                type: 'POST',
+                data: { appointmentId: appointmentId },
+                success: function (response) {
+                    if (response.success) {
+                        alert('Randevu başarıyla iptal edildi.');
+                        button.closest('tr').find('.badge').removeClass('bg-warning').addClass('bg-danger').text('İptal Edildi');
+                        button.remove(); // Butonu kaldır
+                    } else {
+                        alert('Hata: ' + response.error);
+                    }
+                },
+                error: function () {
+                    alert('Bir hata oluştu, lütfen tekrar deneyin.');
+                }
+            });
+        });
+     });
+
+
+
+    </script>
+}

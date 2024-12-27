@@ -118,7 +118,6 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             TempData["msj"] = "Kullanıcı Adı/Şifre Hatalı";
             return RedirectToAction("Login");
 
-
         }
 
 

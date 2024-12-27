@@ -321,6 +321,18 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         }
 
 
+        public async Task<IActionResult> ListAppointment()
+        {
+
+            var appointments = await _context.Appointments
+           .Include(a => a.Service)
+           .Include(a => a.User)
+           .Include(a => a.Employee)
+           .ToListAsync();
+
+            return View(appointments);
+        }
+
 
 
     }

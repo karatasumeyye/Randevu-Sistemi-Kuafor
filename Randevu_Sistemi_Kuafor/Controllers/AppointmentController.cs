@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Randevu_Sistemi_Kuafor.Models;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Randevu_Sistemi_Kuafor.Controllers
 {
@@ -39,65 +41,71 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         }
 
 
-
         // Seçilen tarihteki müsait saatleri döndür
-        public JsonResult GetAvailableTimes(int serviceId, int employeeId, string date)
-        {
-            var service = _context.Services.Find(serviceId);
-            if (service == null)
-                return Json(new { error = "Geçersiz servis seçimi." });
+       public JsonResult GetAvailableTimes(int serviceId, int employeeId, string date)
+{
+    var service = _context.Services.Find(serviceId);
+    if (service == null)
+        return Json(new { error = "Geçersiz servis seçimi." });
+    
+    var employee = _context.Employees
+        .Include(e => e.User)
+        .FirstOrDefault(e => e.EmployeeId == employeeId);
 
-            var employee = _context.Employees
-                 .Include(e => e.User) // User ilişkisini yükle
-                 .FirstOrDefault(e => e.EmployeeId == employeeId);
+    if (employee == null || employee.User == null)
+    {
+        return Json(new { error = "Geçersiz çalışan veya kullanıcı bulunamadı." });
+    }
 
-            if (employee == null || employee.User == null)
-            {
-                return Json(new { error = "Geçersiz çalışan veya kullanıcı bulunamadı." });
-            }
+    if (!DateTime.TryParse(date, out DateTime selectedDate))
+        return Json(new { error = "Geçersiz tarih formatı." });
 
-            if (!DateTime.TryParse(date, out DateTime selectedDate))
-                return Json(new { error = "Geçersiz tarih formatı." });
-
-            var appointmentDuration = TimeSpan.FromMinutes(service.Duration);
+            var appointmentDuration = TimeSpan.FromMinutes(service.Duration); // Servis süresi
             var workingHoursStart = new TimeSpan(9, 0, 0);
-            var workingHoursEnd = new TimeSpan(18, 0, 0);   //Bitiş Saati
-
+            var workingHoursEnd = new TimeSpan(18, 0, 0); // Çalışma saati
             var appointments = _context.Appointments
-                     .Where(a => a.EmployeeId == employeeId &&
-                                 a.AppointmentDate.ToUniversalTime().Date == selectedDate.ToUniversalTime().Date)
-                     .Select(a => new { a.DateTime })
-                     .ToList();
+     .Where(a => a.EmployeeId == employeeId &&
+                 a.AppointmentDate.Date == selectedDate.Date &&
+                 a.Status == AppointmentStatus.Confirmed) // Onaylı randevuları al
+     .Select(a => new {
+         AppointmentDateUtc = a.AppointmentDate.Kind == DateTimeKind.Unspecified
+             ? a.AppointmentDate.ToUniversalTime()  // UTC'ye dönüştür
+             : a.AppointmentDate.ToUniversalTime(), // Zaten UTC ise de UTC'ye dönüştür
+         a.DateTime,  // Bu bir TimeSpan olduğu için saat bilgisi
+         a.AppointmentDate
+     })
+     .ToList();
 
-            var availableTimes = new System.Collections.Generic.List<string>();
+            var availableTimes = new List<string>();
 
-            for (var time = workingHoursStart; time < workingHoursEnd; time = time.Add(TimeSpan.FromMinutes(30)))  //saatlerde yarım saat arayla gösterilecek
+    for (var time = workingHoursStart; time < workingHoursEnd; time = time.Add(TimeSpan.FromMinutes(30))) // 30 dakikalık dilimler
+    {
+        bool isAvailable = true;
+
+        // Mevcut randevuları kontrol et ve uygun saatin dolup dolmadığını kontrol et
+        foreach (var appointment in appointments)
+        {
+            if (appointment.DateTime >= time && appointment.DateTime < time.Add(appointmentDuration))
             {
-                var isAvailable = true;
-
-                foreach (var appointment in appointments)
-                {
-                    if (appointment.DateTime >= time && appointment.DateTime < time.Add(appointmentDuration))
-                    {
-                        isAvailable = false;
-                        break;
-                    }
-                }
-
-                if (isAvailable)
-                {
-                    availableTimes.Add(time.ToString(@"hh\:mm"));
-                }
+                isAvailable = false;
+                break;
             }
-
-            return Json(new
-            {
-                availableTimes = availableTimes,
-                serviceName = service.ServiceName,
-                employeeName = employee.User.Name,
-                date = selectedDate.ToString("yyyy-MM-dd")
-            });
         }
+
+        if (isAvailable)
+        {
+            availableTimes.Add(time.ToString(@"hh\:mm"));
+        }
+    }
+
+    return Json(new
+    {
+        availableTimes = availableTimes,
+        serviceName = service.ServiceName,
+        employeeName = employee.User.Name,
+        date = selectedDate.ToString("yyyy-MM-dd")
+    });
+}
 
 
         public JsonResult ConfirmAppointment(int serviceId, int employeeId, string date, string time)
@@ -125,14 +133,13 @@ namespace Randevu_Sistemi_Kuafor.Controllers
                 return Json(new { success = false, error = "Çalışan için kullanıcı bilgisi bulunamadı." });
             }
 
-
-
             // Tarih ve saat bilgilerini düzenle
             if (!DateTime.TryParse(date + " " + time, out DateTime appointmentDateTime))
             {
                 return Json(new { success = false, error = "Geçersiz tarih veya saat formatı." });
             }
 
+ 
             return Json(new
             {
                 success = true,
@@ -142,6 +149,9 @@ namespace Randevu_Sistemi_Kuafor.Controllers
                 serviceCost = service.Price // Servis ücretini ekledik
             });
         }
+
+
+
 
         public async Task<JsonResult> SaveAppointment(int serviceId, int employeeId, string date, string time)
         {
@@ -157,45 +167,92 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             var service = _context.Services.Find(serviceId);
             var employee = _context.Employees.Find(employeeId);
 
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new { success = false, error = "Kullanıcı kimliği bulunamadı." });
-            }
-
             if (service == null || employee == null)
             {
                 return Json(new { success = false, error = "Geçersiz servis veya çalışan seçimi." });
             }
 
-            // Tarih ve saat bilgilerini düzenle
-            if (!DateTime.TryParse(date + " " + time, out DateTime appointmentDateTime))
-            {
-                return Json(new { success = false, error = "Geçersiz tarih veya saat formatı." });
-            }
+            // Tarih ve saat bilgisini düzenle
+            DateTime localDateTime = DateTime.Parse(date + " " + time);
+
+            // Eğer DateTime türü Unspecified ise UTC'ye dönüştür
+            DateTime utcDateTime = (localDateTime.Kind == DateTimeKind.Unspecified)
+                ? DateTime.SpecifyKind(localDateTime, DateTimeKind.Utc) // UTC'ye dönüştür
+                : localDateTime.ToUniversalTime(); // Zaten UTC ise olduğu gibi bırak
 
             // Randevuyu oluştur
             var appointment = new Appointment
             {
                 ServiceId = serviceId,
                 EmployeeId = employeeId,
-                Price=service.Price,
-                AppointmentDate = appointmentDateTime.ToUniversalTime(),   //!!!! Tarih verisi UtC olarak gönderilmeli 
-                Status = 0,   // Durum başlangıçta 'Pending' (Bekleyen) olabilir  Enum : 0 = Pending
-                UserId = userId // Kullanıcıyı ilişkilendiriyoruz
+                Price = service.Price,
+                AppointmentDate = utcDateTime,  // UTC olarak kaydediyoruz
+                DateTime = utcDateTime.TimeOfDay, // Sadece saati kaydediyoruz
+                Status = AppointmentStatus.Pending,
+                UserId = userId
             };
 
             _context.Appointments.Add(appointment);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true });
         }
 
 
 
+
+
+
+        public async Task<IActionResult> UserAppointments()
+        {
+            var userId = _userManager.GetUserId(User);
+
+           
+            var appointments = await _context.Appointments
+               .Include(a => a.Service)
+               .Where(a => a.UserId== userId)  //// Kullanıcının randevularını çekilir
+               .Include(a => a.Employee)
+               
+               .ToListAsync();
+
+            return View(appointments);
+        }
+
+
+
+        // Kullanıcı randevusunu iptal ettiğinde, randevu veritabanından silinecek
+        [HttpPost]
+        [Authorize]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var appointment = _context.Appointments.Find(id);
+
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+
+            // Kullanıcının sadece kendi randevusunu silebilmesi için kontrol
+            if (appointment.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                return Unauthorized();
+            }
+
+            // Randevuyu iptal etme
+            appointment.Status = AppointmentStatus.Cancelled; // Veya silme yerine iptal etme
+            _context.Appointments.Remove(appointment);
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(UserAppointments));
+        }
     }
 
+
+
+
 }
+
+
 
 
 

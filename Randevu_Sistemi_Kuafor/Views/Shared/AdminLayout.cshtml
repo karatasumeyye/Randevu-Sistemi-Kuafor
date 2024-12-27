@@ -107,9 +107,13 @@
                                     <a href="/Admin/AddEmployee" class="nav-link px-0"> <span class="d-none d-sm-inline">Employee Proceses</span>  </a>
                                 </li>
 
-                        <li>
-                            <a href="/Admin/AddEmployeeService" class="nav-link px-0"> <span class="d-none d-sm-inline">List Employee</span>  </a>
-                        </li>
+                                <li>
+                                    <a href="/Admin/AddEmployeeService" class="nav-link px-0"> <span class="d-none d-sm-inline">List Employee</span>  </a>
+                                </li>
+
+                                <li>
+                            <a href="/Admin/ListAppointment" class="nav-link px-0"> <span class="d-none d-sm-inline">List Appointments</span>  </a>
+                                </li>
 
 
 
@@ -138,11 +142,13 @@
             <div class="col py-3">
                 <!-- RenderBody will place the view-specific content here -->
                 @RenderBody()
+
+                <!-- Scripts Section (Opsiyonel olarak render edilmesini sağlıyoruz) -->
+                @RenderSection("Scripts", required: false)
+
             </div>
 
-            <!-- Scripts Section (Opsiyonel olarak render edilmesini sağlıyoruz) -->
-            @RenderSection("Scripts", required: false)
-
+            
         </div>
     </div>
 
