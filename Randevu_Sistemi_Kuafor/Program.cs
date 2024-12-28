@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Randevu_Sistemi_Kuafor.Models;
+using Randevu_Sistemi_Kuafor.Controllers;
 
 namespace Randevu_Sistemi_Kuafor
 {
@@ -11,7 +12,9 @@ namespace Randevu_Sistemi_Kuafor
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+
+            //Veritabanı Bağlantısı
+
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<SalonDbContext>(options =>
                 options.UseNpgsql(connectionString));
@@ -20,12 +23,17 @@ namespace Randevu_Sistemi_Kuafor
             //    builder.Services.AddDefaultIdentity<UserDetails>(options => options.SignIn.RequireConfirmedAccount = true)
             //       .AddEntityFrameworkStores<ApplicationDbContext>();
 
+
+            //Identity Yapılandırması
+
             builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddDefaultTokenProviders()
                 .AddDefaultUI()
                 .AddEntityFrameworkStores<SalonDbContext>();
             builder.Services.AddControllersWithViews();
 
+
+            // Identity seçenekleri
             builder.Services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireNonAlphanumeric = false;
@@ -36,7 +44,29 @@ namespace Randevu_Sistemi_Kuafor
                 options.Lockout.MaxFailedAccessAttempts = 3;
             });
 
+            // appsettings.json'dan ReplicateSettings'i yükle
+            builder.Services.Configure<ReplicateSettings>(builder.Configuration.GetSection("ReplicateSettings"));
+
+            builder.Services.AddControllersWithViews();
+
+                        builder.Services.AddEndpointsApiExplorer();
+
+                        builder.Services.AddSwaggerGen();
+
+
+            // CORS Configuration
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
+
             var app = builder.Build();
+
 
 
             // Admin kullanıcı ve rolü oluştur
@@ -64,6 +94,12 @@ namespace Randevu_Sistemi_Kuafor
                 app.UseHsts();
             }
 
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            };
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -76,6 +112,8 @@ namespace Randevu_Sistemi_Kuafor
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
+
+                       
 
             app.Run();
         }

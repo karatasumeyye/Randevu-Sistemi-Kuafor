@@ -96,5 +96,6 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return Json(new { success = true });
         }
 
+
     }
 }

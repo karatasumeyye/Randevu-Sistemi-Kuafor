@@ -5,13 +5,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>GetAppointment</h1>
+<h1 class="display-4 text-center mb-4">Randevu Yönetimi</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
+
+<table class="table table-striped table-bordered table-hover">
+    <thead class="thead-dark">
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.AppointmentDate)
@@ -28,48 +26,47 @@
             <th>
                 @Html.DisplayNameFor(model => model.Status)
             </th>
-            <th></th>
+            <th class="text-center">Aksiyon</th>
         </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AppointmentDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Service.ServiceName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @if (item.Status == AppointmentStatus.Pending)
-                {
-                    <button class="btn btn-success approve-btn" data-id="@item.AppointmentId">Onayla</button>
-                    <button class="btn btn-danger cancel-btn" data-id="@item.AppointmentId">İptal Et</button>
-                }
-                else if (item.Status == AppointmentStatus.Confirmed)
-                {
-                    <button class="btn btn-danger cancel-btn" data-id="@item.AppointmentId">İptal Et</button>
-                }
-            </td>
-        </tr>
-    }
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AppointmentDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.User.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Service.ServiceName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td class="text-center">
+                    @if (item.Status == AppointmentStatus.Pending)
+                    {
+                        <button class="btn btn-success approve-btn" data-id="@item.AppointmentId">Onayla</button>
+                        <button class="btn btn-danger cancel-btn" data-id="@item.AppointmentId">İptal Et</button>
+                    }
+                    else if (item.Status == AppointmentStatus.Confirmed)
+                    {
+                        <button class="btn btn-danger cancel-btn" data-id="@item.AppointmentId">İptal Et</button>
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
-@section Scripts{
+@section Scripts {
     <script>
         $(document).ready(function () {
-     
-
             // Onayla butonu
             $('.approve-btn').click(function () {
                 const appointmentId = $(this).data('id');

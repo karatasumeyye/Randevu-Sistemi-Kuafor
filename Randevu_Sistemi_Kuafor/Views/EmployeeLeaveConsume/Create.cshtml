@@ -1,0 +1,30 @@
+﻿@model Randevu_Sistemi_Kuafor.Models.EmployeeLeave
+
+<h1>Create Employee Leave</h1>
+
+<form asp-action="Create" method="post">
+    <div>
+        <label asp-for="EmployeeId"></label>
+        <input asp-for="EmployeeId" class="form-control" />
+    </div>
+    <div>
+        <label asp-for="LeaveStartDate"></label>
+        <input asp-for="LeaveStartDate" type="datetime-local" class="form-control" />
+    </div>
+    <div>
+        <label asp-for="LeaveEndDate"></label>
+        <input asp-for="LeaveEndDate" type="datetime-local" class="form-control" />
+    </div>
+    <div>
+        <label asp-for="Reason"></label>
+        <input asp-for="Reason" class="form-control" />
+    </div>
+    <div>
+        <label asp-for="IsApproved"></label>
+        <input asp-for="IsApproved" type="checkbox" class="form-check-input" />
+    </div>
+    <div>
+        <input type="submit" value="Create" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</form>

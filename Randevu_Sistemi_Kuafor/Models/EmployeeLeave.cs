@@ -1,5 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.EntityFrameworkCore;
+using Randevu_Sistemi_Kuafor.Models;
 
 namespace Randevu_Sistemi_Kuafor.Models
 {
@@ -27,4 +31,6 @@ namespace Randevu_Sistemi_Kuafor.Models
         [ForeignKey("EmployeeId")]
         public Employee Employee { get; set; }
     }
+
+
 }

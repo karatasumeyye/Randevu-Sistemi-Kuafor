@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Randevu_Sistemi_Kuafor.Models;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Randevu_Sistemi_Kuafor.Controllers
 {
@@ -43,6 +47,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return View(services);
         }
 
-        
+
+
     }
 }
