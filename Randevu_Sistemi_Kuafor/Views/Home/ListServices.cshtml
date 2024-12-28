@@ -1,0 +1,41 @@
+﻿@model IEnumerable<Randevu_Sistemi_Kuafor.Models.Service>
+
+<div class="container mt-5">
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm border-light rounded">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.ServiceName</h5>
+                        <p class="card-text">
+                            <strong>Duration:</strong> @item.Duration min <br />
+                            <strong>Price:</strong> @item.Price TL
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Randevu Al Butonu -->
+<div class="text-center mt-5">
+    <button id="appointmentButton" class="btn btn-primary btn-lg">Randevu Al</button>
+</div>
+
+<script>
+    // Randevu Al butonuna tıklandığında kullanıcıyı yönlendirecek
+    document.getElementById("appointmentButton").addEventListener("click", function() {
+        // Kullanıcı giriş yapmış mı diye kontrol et
+        var isAuthenticated = @User.Identity.IsAuthenticated.ToString().ToLower();  // Giriş durumu, C# tarafında true/false
+
+        if (isAuthenticated) {
+            // Giriş yapmışsa Randevu Sayfasına yönlendir
+            window.location.href = '@Url.Action("GetServices", "Appointment")';
+        } else {
+           // Giriş yapmamışsa Giriş Sayfasına yönlendir
+            window.location.href = '/Identity/Account/Login';  
+        }
+    });
+</script>

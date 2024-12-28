@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Randevu_Sistemi_Kuafor.Models;
 using System.Diagnostics;
@@ -6,11 +7,17 @@ namespace Randevu_Sistemi_Kuafor.Controllers
 {
     public class HomeController : Controller
     {
+
+        private readonly SalonDbContext _context;
+    
+      
+
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, SalonDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
@@ -28,5 +35,14 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+        public IActionResult ListServices()
+        {
+            var services = _context.Services.ToList();
+            return View(services);
+        }
+
+        
     }
 }

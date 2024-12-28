@@ -323,4 +323,136 @@ section,
     }
 
 
-    
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+    .card:hover {
+        transform: scale(1.05); /* Hover efekti ile kart büyütme */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Hover sýrasýnda gölge ekleme */
+    }
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #555;
+}
+
+
+/* Randevu Al butonunun stilini özelleþtirelim */
+#appointmentButton {
+    font-size: 18px;
+    padding: 15px 30px;
+    border-radius: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    /* Buton hover efekti */
+    #appointmentButton:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Buton týklanabilir olduðunda */
+    #appointmentButton:active {
+        transform: scale(0.98);
+    }
+
+
+/* Stil iyileþtirmeleri */
+
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+
+.form-label {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.custom-select {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+    .custom-select:focus {
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.5);
+        border-color: #007bff;
+    }
+
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background-color: #f8f9fa;
+}
+
+.btn-group-vertical .btn {
+    margin-bottom: 10px;
+    border-radius: 50px;
+    font-size: 16px;
+}
+
+#createAppointment {
+    font-size: 18px;
+    padding: 15px 30px;
+    border-radius: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    #createAppointment:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+#appointmentSummary {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#saveAppointment, #cancelAppointment {
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 50px;
+}
+
+#saveAppointment {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+#cancelAppointment {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+#saveAppointment:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+#cancelAppointment:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+#availableTimes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 sütunlu grid düzeni */
+    gap: 10px; /* Sütunlar arasýndaki boþluk */
+}
+
+    #availableTimes .btn {
+        width: 100%; /* Butonlarýn tam geniþlikte olmasýný saðlar */
+        text-align: center; /* Metnin ortalanmasýný saðlar */
+    }

@@ -17,12 +17,9 @@
                 @Html.DisplayNameFor(model => model.AppointmentDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateTime)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Price)
             </th>
-            
+
             <th>
                 @Html.DisplayNameFor(model => model.Employee.User.Name)
             </th>
@@ -35,20 +32,19 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AppointmentDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td> 
-            <td>
-                @Html.DisplayFor(modelItem => item.Service.ServiceName)
-            </td>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AppointmentDate)
+                   
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Service.ServiceName)
+                </td>
                 <td>
                     @if (item.Status == AppointmentStatus.Pending)
                     {
@@ -61,18 +57,20 @@
                     else if (item.Status == AppointmentStatus.Cancelled)
                     {
                         <span class="badge bg-danger">İptal Edildi</span>
-                    }  
+                    }
                 </td>
 
-            <td>
+                <td>
                     @if (item.Status != AppointmentStatus.Cancelled)
                     {
                         <form method="post" asp-action="DeleteConfirmed" asp-route-id="@item.AppointmentId" onsubmit="return confirm('Randevuyu iptal etmek istediğinizden emin misiniz?');">
                             <button type="submit" class="btn btn-danger btn-sm">İptal Et</button>
                         </form>
                     }
-            </td>
-        </tr>
-}
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+

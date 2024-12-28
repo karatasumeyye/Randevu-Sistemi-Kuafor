@@ -21,9 +21,6 @@ namespace Randevu_Sistemi_Kuafor.Models
         public DateTime AppointmentDate { get; set; }
 
         [Required]
-        public TimeSpan DateTime { get; set; }
-
-        [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 
