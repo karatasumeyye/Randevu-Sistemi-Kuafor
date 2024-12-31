@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="~/Randevu_Sistemi_Kuafor.styles.css" asp-append-version="true" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/css/bootstrap-datepicker.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-timepicker@0.5.2/css/bootstrap-timepicker.min.css" rel="stylesheet">
+    @RenderSection("Styles", required: false)
 
 </head>
 <body>
@@ -50,19 +51,21 @@
                             </li>
                         }
 
-                        @if (User.IsInRole("Employee") || User.IsInRole("Admin"))
+                        @if (User.IsInRole("Employee"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Employee" asp-action="GetAppointment"> Employee Appointments </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="EmployeeLeaveConsume" asp-action="Index">Employee Leave</a>
                             </li>
                         }
                   
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Image" asp-action="Index">Test Et</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="EmployeeLeaveConsume" asp-action="Index">Employee Leave</a>
-                        </li>
+                       
                       
 
                     </ul>

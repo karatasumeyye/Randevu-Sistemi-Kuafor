@@ -1,0 +1,38 @@
+﻿@model Randevu_Sistemi_Kuafor.Models.Service
+
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h1 class="mb-0">Service Details</h1>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title text-secondary">Service Information</h4>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-3 font-weight-bold text-dark">
+                    @Html.DisplayNameFor(model => model.ServiceName)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.ServiceName)
+                </dd>
+                <dt class="col-sm-3 font-weight-bold text-dark">
+                    @Html.DisplayNameFor(model => model.Duration)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.Duration)
+                </dd>
+                <dt class="col-sm-3 font-weight-bold text-dark">
+                    @Html.DisplayNameFor(model => model.Price)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.Price)
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>
+

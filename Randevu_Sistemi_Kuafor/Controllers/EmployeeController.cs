@@ -17,7 +17,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             _userManager = userManager;
         }
 
-        //[Authorize(Roles = "Employee")] // Add authorization
+        [Authorize(Roles = "Employee")] // Add authorization
         public async Task<IActionResult> GetAppointment()
         {
             var userId = _userManager.GetUserId(User);

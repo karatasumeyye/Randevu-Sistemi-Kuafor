@@ -29,7 +29,7 @@ namespace Randevu_Sistemi_Kuafor.Models
 
         // İlişkiler
         [ForeignKey("EmployeeId")]
-        public Employee Employee { get; set; }
+        public Employee? Employee { get; set; }
     }
 
 

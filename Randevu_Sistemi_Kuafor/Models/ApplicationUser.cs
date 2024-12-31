@@ -8,6 +8,9 @@ namespace Randevu_Sistemi_Kuafor.Models
         [Required]
         [Display(Name = "Full Name")]
         public String Name { get; set; } // Eski "Name" alanı
+
+        // User ile ilişkilendirilen EmployeeId
+        public int? EmployeeId { get; set; }  // Nullable çünkü tüm kullanıcıların bir employee kaydına sahip olmaması gerekebilir
     }
 
 }

@@ -1,40 +1,185 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Resim Yükleme ve Saç Stili Değiştirme";
 }
 
-@{
-    ViewData["Title"] = "UploadImage";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+<h2>Resim Yükleme ve Saç Stili Değiştirme</h2>
+
+@section Styles {
+    <style>
+        body {
+            background: #f7f7f7;
+            color: #333;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #b22222;
+            font-weight: bold;
+        }
+
+        label {
+            font-weight: bold;
+            color: #b22222;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background-color: #fdfdfd;
+            color: #333;
+        }
+
+            .form-control::placeholder {
+                color: #aaa;
+            }
+
+        button {
+            border-radius: 8px;
+            background-color: #b22222;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #8b1a1a;
+            }
+
+        .alert {
+            margin-top: 20px;
+            color: white;
+            background-color: #d9534f;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .result-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .preview-container, .result-image {
+            flex: 1;
+            text-align: center;
+            margin: 0 10px;
+        }
+
+            .preview-container img, .result-image img {
+                max-width: 100%;
+                border-radius: 12px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
 }
 
-<h2>Resim Yükle ve Saç Rengini Değiştir</h2>
+<div class="container">
+    <h2>Resim Yükleme ve Saç Stili Değiştirme</h2>
 
-<form enctype="multipart/form-data" method="post" asp-controller="Image" asp-action="UploadImage">
-    <div class="form-group">
-        <label for="file">Fotoğraf Yükleyin</label>
-        <input type="file" id="file" name="file" accept="image/*" class="form-control" required />
+    <!-- Hata Mesajları -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <p>@error.ErrorMessage</p>
+            }
+        </div>
+    }
+
+    <!-- Form -->
+    <form asp-controller="Image" asp-action="UploadImage" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="image">Resim Yükle</label>
+            <input type="file" class="form-control" id="image" name="image" required />
+            <small class="form-text text-muted">
+                Desteklenen formatlar: JPEG, JPG, PNG, BMP. Maksimum boyut: 5 MB.
+            </small>
+        </div>
+
+        <div class="mb-3">
+            <label for="hairType">Saç Stili Seçin</label>
+            <select class="form-select" id="hairType" name="hairType">
+                <option value="101">Bangs (Kâkül)</option>
+                <option value="201">Long Hair (Uzun Saç)</option>
+                <option value="301">Bangs with Long Hair</option>
+                <option value="401">Medium Hair Increase</option>
+                <option value="402">Light Hair Increase</option>
+                <option value="403">Heavy Hair Increase</option>
+                <option value="502">Light Curling</option>
+                <option value="503">Heavy Curling</option>
+                <option value="603">Short Hair</option>
+                <option value="801">Blonde</option>
+                <option value="901">Straight Hair</option>
+                <option value="1001">Oil-Free Hair</option>
+                <option value="1101">Hairline Fill</option>
+                <option value="1201">Smooth Hair</option>
+                <option value="1301">Fill Hair Gap</option>
+            </select>
+        </div>
+
+        <button type="submit">Resmi Yükle ve Saç Stili Uygula</button>
+    </form>
+
+    <div class="result-container">
+        <div class="preview-container" id="previewContainer" style="display: none;">
+            <h3>Seçilen Resim</h3>
+            <img id="previewImage" alt="Resim Önizleme">
+        </div>
+
+        @if (ViewBag.ResultImage != null)
+        {
+            <div class="result-image">
+                <h3>Sonuç Resmi</h3>
+                <img src="data:image/png;base64,@ViewBag.ResultImage" alt="Sonuç Resmi" />
+            </div>
+        }
     </div>
+</div>
 
-    <div class="form-group">
-        <label for="colorDescription">Saç Rengi</label>
-        <input type="text" id="colorDescription" name="colorDescription" class="form-control" placeholder="Örneğin: Sarı" required />
-    </div>
+<footer>
+    &copy; 2024 - Resim Yükleme ve Saç Stili Değiştirme
+</footer>
 
-    <div class="form-group">
-        <label for="hairstyleDescription">Saç Modeli</label>
-        <input type="text" id="hairstyleDescription" name="hairstyleDescription" class="form-control" placeholder="Örneğin: Hi-top fade" required />
-    </div>
+<script>
+    document.getElementById('image').addEventListener('change', function (event) {
+        const file = event.target.files[0];
 
-    <button type="submit" class="btn btn-primary">Gönder</button>
-</form>
+        if (file) {
+            const reader = new FileReader();
 
-@if (ViewData["Result"] != null)
-{
-    <div class="alert alert-info mt-4">
-        <strong>Sonuç:</strong> @ViewData["Result"]
-    </div>
-}
+            reader.onload = function (e) {
+                const previewContainer = document.getElementById('previewContainer');
+                const previewImage = document.getElementById('previewImage');
 
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+            };
 
+            reader.readAsDataURL(file);
+        }
+    });
+</script>

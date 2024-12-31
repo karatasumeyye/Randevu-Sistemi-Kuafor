@@ -4,106 +4,107 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
 using Newtonsoft.Json;
 
 namespace Randevu_Sistemi_Kuafor.Controllers
 {
     public class ImageController : Controller
     {
-        private const string ApiKey = "r8_YR4XnzVFn1dIzoPmi7GB7m27vmpK5920DmtV6";
-        private const string ReplicateUrl = "https://api.replicate.com/v1/predictions";
+        private readonly IHttpClientFactory _httpClientFactory;
 
+        private const string ApiUrl = "https://hairstyle-changer.p.rapidapi.com/huoshan/facebody/hairstyle";
+        private const string ApiKey = "84d93e1cebmshf6cbb20faa8db76p1eb7a2jsnd2ea9a4a95f9";
+
+        public ImageController(IHttpClientFactory httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        }
+
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
-        private async Task<string> SendImageToReplicate(string imageUrl, string colorDescription, string hairstyleDescription)
-        {
-            using (var client = new HttpClient())
-            {
-                // Authorization başlığını ekle
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey);
-
-                var requestData = new
-                {
-                    version = "b95cb2a16763bea87ed7ed851d5a3ab2f4655e94bcfb871edba029d4814fa587",
-                    input = new
-                    {
-                        image = imageUrl,
-                        color_description = colorDescription,
-                        hairstyle_description = hairstyleDescription
-                    }
-                };
-
-                var jsonContent = JsonConvert.SerializeObject(requestData);
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-                // POST isteği gönder
-                var response = await client.PostAsync(ReplicateUrl, content);
-                if (!response.IsSuccessStatusCode)
-                {
-                    return $"Error: {response.ReasonPhrase}";
-                }
-
-                // POST yanıtını oku
-                var postResponse = await response.Content.ReadAsStringAsync();
-                var postResult = JsonConvert.DeserializeObject<dynamic>(postResponse);
-                string predictionId = postResult.id;
-
-                // İşlemin tamamlanmasını bekle
-                string getUrl = $"{ReplicateUrl}/{predictionId}";
-                while (true)
-                {
-                    var getResponse = await client.GetAsync(getUrl);
-                    var getContent = await getResponse.Content.ReadAsStringAsync();
-                    var getResult = JsonConvert.DeserializeObject<dynamic>(getContent);
-
-                    if (getResult.status == "succeeded")
-                    {
-                        return getResult.output.ToString();
-                    }
-                    else if (getResult.status == "failed")
-                    {
-                        return $"Error: {getResult.error}";
-                    }
-
-                    // Bekleme süresi
-                    await Task.Delay(2000);
-                }
-            }
-        }
 
         [HttpPost]
-        public async Task<IActionResult> UploadImage(IFormFile file, string colorDescription, string hairstyleDescription)
+        public async Task<IActionResult> UploadImage(IFormFile image, int hairType = 101)
         {
-            if (file == null || file.Length == 0)
+            // Resim dosyası kontrolü
+            if (image == null || image.Length == 0)
             {
-                return BadRequest("No file uploaded.");
+                ModelState.AddModelError("", "Lütfen bir resim dosyası yükleyin.");
+                return View("Index");
             }
 
-            // Görseli sunucuya yükle
-            var uploadDirectory = Path.Combine("wwwroot", "uploads");
-            if (!Directory.Exists(uploadDirectory))
+            // Dosya boyutu kontrolü (5 MB sınırı)
+            if (image.Length > 5 * 1024 * 1024)
             {
-                Directory.CreateDirectory(uploadDirectory);
+                ModelState.AddModelError("", "Yüklenen resim 5 MB'den büyük olamaz.");
+                return View("Index");
             }
 
-            var filePath = Path.Combine(uploadDirectory, file.FileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // Dosya formatı kontrolü
+            var allowedFormats = new[] { ".jpg", ".jpeg", ".png", ".bmp" };
+            var fileExtension = Path.GetExtension(image.FileName).ToLower();
+            if (!allowedFormats.Contains(fileExtension))
             {
-                await file.CopyToAsync(stream);
+                ModelState.AddModelError("", "Yalnızca JPEG, JPG, PNG ve BMP formatları destekleniyor.");
+                return View("Index");
             }
 
-            var imageUrl = $"http://localhost:5123/uploads/{file.FileName}";
-            var result = await SendImageToReplicate(imageUrl, colorDescription, hairstyleDescription);
-
-            if (result.StartsWith("Error:"))
+            // Resim çözünürlüğünü kontrol etme
+            using (var imageStream = image.OpenReadStream())
             {
-                return BadRequest(result);
+                var img = System.Drawing.Image.FromStream(imageStream);
+                if (img.Width > 4096 || img.Height > 4096)
+                {
+                    ModelState.AddModelError("", "Resim çözünürlüğü 4096x4096 pikselden büyük olamaz.");
+                    return View("Index");
+                }
             }
 
-            return Ok(result);
+            // API'ye istek gönderme
+            var client = _httpClientFactory.CreateClient();
+            var requestContent = new MultipartFormDataContent();
+
+            using var stream = image.OpenReadStream();
+            var streamContent = new StreamContent(stream);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(image.ContentType);
+            requestContent.Add(streamContent, "image_target", image.FileName);
+            requestContent.Add(new StringContent(hairType.ToString()), "hair_type");
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri("https://hairstyle-changer.p.rapidapi.com/huoshan/facebody/hairstyle"),
+                Headers =
+        {
+            { "x-rapidapi-key", "84d93e1cebmshf6cbb20faa8db76p1eb7a2jsnd2ea9a4a95f9" },
+            { "x-rapidapi-host", "hairstyle-changer.p.rapidapi.com" },
+        },
+                Content = requestContent
+            };
+
+            using var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(responseBody);
+
+                ViewBag.ResultImage = result.data?.image;
+                return View("Index");
+            }
+            else
+            {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"API Hatası: {errorBody}");
+                return View("Index");
+            }
         }
     }
-}
+
+ }
+

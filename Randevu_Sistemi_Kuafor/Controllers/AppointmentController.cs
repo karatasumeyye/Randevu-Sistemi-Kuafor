@@ -19,7 +19,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             _userManager = userManager;
         }
 
-        // İşlemleri döndür
+        
         public IActionResult GetServices()
         {
             var services = _context.Services.ToList();
@@ -44,56 +44,69 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         // Müsait saatleri döndür
         public JsonResult GetAvailableTimes(int serviceId, int employeeId, string date)
         {
+            // Servisi kontrol et
             var service = _context.Services.Find(serviceId);
             if (service == null)
                 return Json(new { error = "Geçersiz servis." });
 
-            var employee = _context.Employees.FirstOrDefault(e => e.EmployeeId == employeeId);
+            // Çalışanı kontrol et
+            var employee = _context.Employees
+                .Include(e => e.User)
+                .FirstOrDefault(e => e.EmployeeId == employeeId);
             if (employee == null)
                 return Json(new { error = "Geçersiz çalışan." });
 
+            // Tarihi doğrula
             if (!DateTime.TryParse(date, out DateTime selectedDate))
                 return Json(new { error = "Geçersiz tarih formatı." });
 
+            // Tarihin saat kısmını sıfırlayın ve UTC olarak ayarlayın
+            selectedDate = DateTime.SpecifyKind(selectedDate, DateTimeKind.Utc);
+
+            // UTC tarihini kullanın
+            var utcDate = selectedDate; // Zaten UTC olduğundan dönüştürmeye gerek yok
+
+
+            // Çalışma saatleri
             var workingHoursStart = new TimeSpan(9, 0, 0);
             var workingHoursEnd = new TimeSpan(18, 0, 0);
 
-
-          
-
-
+            // Randevuları getir
             var appointments = _context.Appointments
-                 .Include(a => a.Service) // Service tablosunu dahil ediyoruz
-                 .Include(a=>a.User)
+                .Include(a => a.Service)
                 .Where(a => a.EmployeeId == employeeId
-                            && a.AppointmentDate.Date == selectedDate.Date.ToUniversalTime()
+                            && a.ServiceId == serviceId
+                            && a.AppointmentDate.Date == utcDate.Date // Tarih karşılaştırması
                             && a.Status == AppointmentStatus.Confirmed)
-                .Select(a => new { a.AppointmentDate, a.Service.Duration })
+                .Select(a => new
+                {
+                    Start = a.AppointmentDate.TimeOfDay,
+                    End = a.AppointmentDate.TimeOfDay.Add(TimeSpan.FromMinutes(a.Service.Duration))
+                })
                 .ToList();
 
+            // Uygun saatleri hesapla
             var availableTimes = new List<string>();
-
             for (var time = workingHoursStart; time < workingHoursEnd; time = time.Add(TimeSpan.FromMinutes(30)))
             {
                 bool isAvailable = !appointments.Any(a =>
-                {
-                    var appointmentEnd = a.AppointmentDate.TimeOfDay.Add(TimeSpan.FromMinutes(a.Duration));
-                    return a.AppointmentDate.TimeOfDay < time.Add(TimeSpan.FromMinutes(30)) &&
-                           appointmentEnd > time;
-                });
+                    a.Start < time.Add(TimeSpan.FromMinutes(30)) && a.End > time);
 
                 if (isAvailable)
                     availableTimes.Add(time.ToString(@"hh\:mm"));
             }
 
+            // Sonucu döndür
             return Json(new
             {
                 availableTimes,
                 serviceName = service.ServiceName,
-               // employeeName = employee.User.Name,
+                employeeName = employee.User.Name,
                 date = selectedDate.ToString("yyyy-MM-dd")
             });
         }
+
+
 
         // Randevuyu doğrula
         public JsonResult ConfirmAppointment(int serviceId, int employeeId, string date, string time)
@@ -163,30 +176,8 @@ namespace Randevu_Sistemi_Kuafor.Controllers
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // Kullanıcının randevularını görüntüle
+        [Authorize]
         public async Task<IActionResult> UserAppointments()
         {
             var userId = _userManager.GetUserId(User);

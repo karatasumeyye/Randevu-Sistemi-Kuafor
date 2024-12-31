@@ -12,6 +12,7 @@ namespace Randevu_Sistemi_Kuafor
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddHttpClient(); // IHttpClientFactory servisini kaydet
 
             //Veritabanı Bağlantısı
 
@@ -54,17 +55,14 @@ namespace Randevu_Sistemi_Kuafor
                         builder.Services.AddSwaggerGen();
 
 
-            // CORS Configuration
+            // CORS ayarlarını ekleyin
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
-                });
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => builder.WithOrigins("http://localhost:5123") // İzin verilen domain
+                                      .AllowAnyMethod()
+                                      .AllowAnyHeader());
             });
-
             var app = builder.Build();
 
 
@@ -117,6 +115,9 @@ namespace Randevu_Sistemi_Kuafor
 
             app.Run();
         }
+
+
+
         private static async Task SeedAdminAsync(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             // Admin rolü oluştur

@@ -31,7 +31,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return View();
         }
 
-
+        //SErvis EKleme
         [HttpPost]
         public IActionResult ServiceAdd(Service service)
         {
@@ -62,6 +62,8 @@ namespace Randevu_Sistemi_Kuafor.Controllers
           
         }
 
+
+        //Servis Güncelleme, ajax
         [HttpGet]
         public IActionResult ServiceUpdate()
         {
@@ -71,7 +73,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
 
 
 
-        //Edit Action 
+        //Servis Editleme,Ajax 
         [HttpPost]
         public IActionResult Edit(Service updatedService) {
             if (ModelState.IsValid)
@@ -97,6 +99,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         
         }
 
+        //Servis Silme
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -116,7 +119,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return RedirectToAction("ServiceUpdate", "Admin");
         }
 
-
+        //Servis Silme
         public async Task<IActionResult> Detail(int id)
         {
             if(id == null || _context.Services == null)
@@ -135,8 +138,8 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         }
 
 
+        // Employee Eklemek için user listeleme
         [HttpGet]
-
         public IActionResult AddEmployee()
         {
             var users = _context.Users.ToList();
@@ -144,7 +147,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
         }
 
 
-
+        //Epmloyee Ekleme
         [HttpPost]
         // UserManager işlemleriasenkron olduğu için async ve await anahtar kelimeleri kullanılır
         public async Task<IActionResult> AddEmployee(string userId, string specialty, decimal salary, DateTime startDate)
@@ -226,7 +229,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
 
 
 
-        // Servileri Listeleme
+        // Servileri Listeleme, Employee ile ilişkilendirme için 
         [HttpGet]
         public IActionResult GetServices(int employeeId)
         {
@@ -320,7 +323,7 @@ namespace Randevu_Sistemi_Kuafor.Controllers
             return RedirectToAction("AddEmployeeService", "Admin");
         }
 
-
+        //Randevuları Listeleme
         public async Task<IActionResult> ListAppointment()
         {
 

@@ -1,31 +1,46 @@
 ﻿@model List<Randevu_Sistemi_Kuafor.Models.EmployeeLeave>
 
-<h1>Employee Leaves</h1>
+@{
+    ViewData["Title"] = "Employee Leaves";
+}
 
-<div>
-    <a asp-action="Create" class="btn btn-success">Create New Leave</a>
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Employee Leaves</h1>
+
+    <!-- Create New Leave Button -->
+    <div class="text-right mb-3">
+        <a asp-action="Create" class="btn btn-primary btn-lg">Create New Leave</a>
+    </div>
+
+    <!-- Employee Leaves Table -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Reason</th>
+                   @*  <th>Is Approved</th> *@
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var leave in Model)
+                {
+                    <tr>
+                        <td>@leave.LeaveStartDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@leave.LeaveEndDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@leave.Reason</td>
+                      @*   <td>@(leave.IsApproved ? "Yes" : "No")</td> *@
+                        <td>
+                            <div class="d-flex justify-content-center">
+                                <a asp-action="Details" asp-route-id="@leave.LeaveId" class="btn btn-info btn-sm mx-1">Details</a>          
+                                <a asp-action="Delete" asp-route-id="@leave.LeaveId" class="btn btn-danger btn-sm mx-1">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<table>
-    <tr>
-        <th>Start Date</th>
-        <th>End Date</th>
-        <th>Reason</th>
-        <th>Is Approved</th>
-        <th>Actions</th>
-    </tr>
-    @foreach (var leave in Model)
-    {
-        <tr>
-            <td>@leave.LeaveStartDate</td>
-            <td>@leave.LeaveEndDate</td>
-            <td>@leave.Reason</td>
-            <td>@leave.IsApproved</td>
-            <td>
-                <a asp-action="Details" asp-route-id="@leave.LeaveId" class="btn btn-info">Details</a>
-                <a asp-action="Edit" asp-route-id="@leave.LeaveId" class="btn btn-warning">Edit</a>
-                <a asp-action="Delete" asp-route-id="@leave.LeaveId" class="btn btn-danger">Delete</a>
-            </td>
-        </tr>
-    }
-</table>
